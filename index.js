@@ -2,10 +2,17 @@ require('dotenv').config()
 const Koa = require('koa')
 const Router = require('koa-router')
 const axios = require('axios')
+const bodyParser = require('koa-body')
 
 
 const app = new Koa()
 const router = new Router()
+
+app.use(bodyParser({
+    multipart: true,
+    urlencoded: true
+}))
+
 
 /*app.use(async ctx => {
   ctx.body = 'Hello World'
@@ -39,7 +46,7 @@ const searchIdp = async () => {
         headers: {
             'Authorization': `Bearer ${process.env.TOKEN}`,
         }
-    }) 
+    })
 }
 
 router.get('/library/card', async ctx => {
@@ -64,17 +71,17 @@ router.get('/library/card', async ctx => {
     //tämä palauttamaan sen asiakkaan korttinro, jonka hetu tästää usersSsn:n kanssa
     //TODO: muuta kovakoodaus oikeaksi tarkistukseksi
     ctx.body = {
-        "cardnumber" : rightPatron.cardnumber
+        "cardnumber": rightPatron.cardnumber
     }
 })
 
 //uuden asiakkaan luominen Kohaan
 router.post('/library/card', async ctx => {
-    newPatron = await axios({method: "post", url: `${baseAddress}/patrons`, data: {}})
-    //otetaan patron_id talteen, lähetetään sillä pin-koodi perässä `${baseAddress}/patrons/{patron_id}/password`
+    const newPatron = await axios({ method: "post", url: `${baseAddress}/patrons`, data: {} })
+    // TODO: otetaan patron_id talteen, lähetetään sillä pin-koodi perässä `${baseAddress}/patrons/{patron_id}/password`
 })
 
-//TODO: tämä hakemaan myös PIN!
+// tätä ei ehkä tarvita? PIN-koodia ei ole mahdollista saada tätä kautta
 //olennaisimpien asiakastietojen haku ja palautus MyJYU:un
 router.get('/library/patron', async ctx => {
     const result = await getPatron()
@@ -99,6 +106,25 @@ router.get('/library/patron', async ctx => {
 router.post('/library/card/pin', async ctx => {
     // haetaan asiakkaan id (nimellä, puh.nrolla, emaililla?)
     // sitten postataan pin-koodi ko. asiakkaalle
+    const newPin = ctx.request.body.pin1
+    const newPin2 = ctx.request.body.pin2
+    const result = await getPatron()
+    // TODO: tähän oikean asiakkaan etsiminen ekan sijaan
+    const patronId = result.data[0].patron_id
+    console.log(patronId)
+    await axios({
+        method: "post", url: `${baseAddress}/patrons/${patronId}/password`, headers: {
+            'Authorization': `Basic ${process.env.BASIC}`
+        }, data: {
+            "password": newPin,
+            "password_2": newPin2
+        }
+    }).then((result) => {
+        ctx.response.status = 200
+    }).catch((error) => {
+        // TODO: onko hyvä lähettää Kohan antama virhekoodi eteenpäin vai laittaa responseen joku oma/omat?
+            ctx.response.status = error.response.status
+        })
 })
 
 app.use(router.routes())
