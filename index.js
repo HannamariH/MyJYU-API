@@ -20,51 +20,44 @@ const baseAddress = "https://app1.jyu.koha.csc.fi/api/v1/"
 
 let nextCardnumber = 2500300000
 
-// ensin kokeillaan käyttäjätunnuksella (altcontact_firstname), sitten nimi (suku ja eka etunimi?), puh, email, osoite?
-const getPatron = async (personData, ssn) => {
-    let candidates = []
+const checkSsn = (candidateData, ssn) => {
+    for (cand of candidateData) {
+        const candSsn = (cand.extended_attributes[0].value)
+        if (candSsn == ssn) {
+            return cand
+        }
+    }
+    return
+}
 
-    // TODO: refaktoroi
+const getPatron = async (personData, ssn) => {
 
     // search by username
-    candidates = await axios.get(`${baseAddress}/patrons/?altcontact_firstname=${personData.username}`, {
+    let candidates = await axios.get(`${baseAddress}/patrons/?altcontact_firstname=${personData.username}`, {
         headers: {
             'Authorization': `Basic ${process.env.BASIC}`,
             'x-koha-embed': 'extended_attributes'
         }
     })
-    // näköjään tämä ei aiheuta virhettä vaikka candidates.dataa ei olisikaan!
-    for (cand of candidates.data) {
-        console.log("tutkitaan usernamella haettuja")
-        const candSsn = (cand.extended_attributes[0].value)
-        console.log(candSsn)
-        if (candSsn == ssn) {
-            console.log("löytyi usernamella")
-            return cand
-        } else {
-            console.log("ei löytynyt usernamella")
-        }
+    let cand = checkSsn(candidates.data, ssn)
+    if (cand) {
+        return cand
     }
 
     // search by firstname and surname
     const firstname = personData.firstname.split(" ")[0]
     // TODO: käytä tuotannossa suku + etu -hakua (oma testi vain sukunimellä)
-    //candidates = await axios.get(`${baseAddress}/patrons/?surname=${personData.surname}&firstname=${firstname}`, {
+    candidates = await axios.get(`${baseAddress}/patrons/?surname=${personData.surname}&firstname=${firstname}`, {
     //candidates = await axios.get(`${baseAddress}/patrons/?surname=${personData.surname}`, {    
-    candidates = await axios.get(`${baseAddress}/patrons/?surname=iodjdguihudhd`, {
+    //candidates = await axios.get(`${baseAddress}/patrons/?surname=iodjdguihudhd`, {
         headers: {
             'Authorization': `Basic ${process.env.BASIC}`,
             'x-koha-embed': 'extended_attributes'
         }
     })
-
-    for (cand of candidates.data) {
-        console.log("tutkitaan sukunimellä haettuja")
-        const candSsn = (cand.extended_attributes[0].value)
-        console.log(candSsn)
-        if (candSsn == ssn) {
-            return cand
-        }
+    cand = checkSsn(candidates.data, ssn)
+    if (cand) {
+        return cand
     }
 
     // search by email
@@ -74,13 +67,9 @@ const getPatron = async (personData, ssn) => {
             'x-koha-embed': 'extended_attributes'
         }
     })
-    for (cand of candidates.data) {
-        console.log("tutkitaan emaililla haettuja")
-        const candSsn = (cand.extended_attributes[0].value)
-        console.log(candSsn)
-        if (candSsn == ssn) {
-            return cand
-        }
+    cand = checkSsn(candidates.data, ssn)
+    if (cand) {
+        return cand
     }
 
     // search by street adress
@@ -90,15 +79,11 @@ const getPatron = async (personData, ssn) => {
             'x-koha-embed': 'extended_attributes'
         }
     })
-    for (cand of candidates.data) {
-        console.log("tutkitaan katuosoitteella haettuja")
-        const candSsn = (cand.extended_attributes[0].value)
-        console.log(candSsn)
-        if (candSsn == ssn) {
-            return cand
-        }
+    cand = checkSsn(candidates.data, ssn)
+    if (cand) {
+        return cand
     }
-
+    return
 }
 
 const searchIdp = async (token) => {
