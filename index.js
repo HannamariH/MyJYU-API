@@ -33,7 +33,7 @@ const checkSsn = (candidateData, ssn) => {
 const getPatron = async (personData) => {
 
     const ssn = personData.ssn
-    
+
     // search by username
     let candidates = await axios.get(`${baseAddress}/patrons/?altcontact_firstname=${personData.username}`, {
         headers: {
@@ -116,7 +116,6 @@ const getToken = ctx => {
     return null
 }
 
-
 router.get('/library/card', async ctx => {
     const token = getToken(ctx)
     if (!token) {
@@ -145,6 +144,14 @@ router.get('/library/card', async ctx => {
 //uuden asiakkaan luominen Kohaan
 // TODO: mietittävä, mitkä as.tiedot otetaan IDP:stä ja mitkä asiakas saa antaa itse
 router.post('/library/card', async ctx => {
+
+    const token = getToken(ctx)
+    if (!token) {
+        return ctx.status = 401
+    }
+    const person = await searchIdp(token)
+
+
     // TODO: tähän tietenkin post requestissa tuleva data + idp:stä haetut tiedot tilalle
     const data = {
         "address": "testikatu 7",
@@ -173,6 +180,7 @@ router.post('/library/card', async ctx => {
             'Authorization': `Basic ${process.env.BASIC}`
         }, data
     })  //TODO: tämä virheenkäsittely ei toimi. (?) Miten päätetään reitin suoritus tähän, jos ei luotu uutta?
+        // TODO: tuolla return ctx.status -jutulla
     /*.catch((error) => {
         // TODO: onko hyvä lähettää Kohan antama virhekoodi eteenpäin vai laittaa responseen joku oma/omat?
         ctx.response.status = error.response.status
@@ -204,34 +212,40 @@ router.post('/library/card', async ctx => {
 
 //pin-koodin vaihtaminen
 router.post('/library/card/pin', async ctx => {
-    // haetaan asiakkaan id (nimellä, puh.nrolla, emaililla?)
-    // sitten postataan pin-koodi ko. asiakkaalle
+
+    const token = getToken(ctx)
+    if (!token) {
+        return ctx.status = 401
+    }
+    const person = await searchIdp(token)
+    const personData = {
+        "username": person.data.preferred_username,
+        "firstname": person.data.given_name,
+        "surname": person.data.family_name,
+        "email": person.data.email,
+        "streetAddress": person.data.home_street_address,
+        "zip": person.data.home_zip_code,
+        "city": person.data.home_city, 
+        "ssn": person.data.ssn
+    }
+    const patron = await getPatron(personData)
+    if (!patron) {
+        return ctx.status = 404
+    }
+    console.log("patron_id: " + patron.patron_id)
+    const patronId = patron.patron_id
     const newPin = ctx.request.body.pin1
     const newPin2 = ctx.request.body.pin2
-    const result = await getPatron()
-    // TODO: tähän oikean asiakkaan etsiminen ekan sijaan
-    const patronId = result.data[0].patron_id
-    console.log(patronId)
-    const changedPin = await postNewPin(newPin, newPin2, patronId)
-        .then((result) => {
+
+    await postNewPin(newPin, newPin2, patronId)
+        .then(() => {
             ctx.response.status = 200
         }).catch((error) => {
             // TODO: onko hyvä lähettää Kohan antama virhekoodi eteenpäin vai laittaa responseen joku oma/omat?
+            // jos pin1 ja pin2 ei ole samat, Koha antaa 400 Bad request
+            // samoin jos pin1 tai pin2 puuttuu bodysta
             ctx.response.status = error.response.status
         })
-    /*await axios({
-        method: "post", url: `${baseAddress}/patrons/${patronId}/password`, headers: {
-            'Authorization': `Basic ${process.env.BASIC}`
-        }, data: {
-            "password": newPin,
-            "password_2": newPin2
-        }
-    }).then((result) => {
-        ctx.response.status = 200
-    }).catch((error) => {
-        // TODO: onko hyvä lähettää Kohan antama virhekoodi eteenpäin vai laittaa responseen joku oma/omat?
-        ctx.response.status = error.response.status
-    })*/
 })
 
 // tätä ei ehkä tarvita? PIN-koodia ei ole mahdollista saada tätä kautta
