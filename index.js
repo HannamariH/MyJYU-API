@@ -23,7 +23,9 @@ let nextCardnumber = 2500300000
 // ensin kokeillaan käyttäjätunnuksella (altcontact_firstname), sitten nimi (suku ja eka etunimi?), puh, email, osoite?
 const getPatron = async (personData, ssn) => {
     let candidates = []
-    
+
+    // TODO: refaktoroi
+
     // search by username
     candidates = await axios.get(`${baseAddress}/patrons/?altcontact_firstname=${personData.username}`, {
         headers: {
@@ -82,7 +84,7 @@ const getPatron = async (personData, ssn) => {
     }
 
     // search by street adress
-    candidates = await axios.get(`${baseAddress}/patrons/?email=${personData.streetAddress}`, {
+    candidates = await axios.get(`${baseAddress}/patrons/?address=${personData.streetAddress}`, {
         headers: {
             'Authorization': `Basic ${process.env.BASIC}`,
             'x-koha-embed': 'extended_attributes'
@@ -96,8 +98,6 @@ const getPatron = async (personData, ssn) => {
             return cand
         }
     }
-
-    // TODO: haku puh.nrolla jos lisätään Library scopeen
 
 }
 
@@ -125,7 +125,7 @@ const getToken = ctx => {
     const auth = ctx.get('Authorization')
     if (auth.startsWith('Bearer')) {
         return auth.substring(7)
-    } 
+    }
     return null
 }
 
@@ -138,7 +138,7 @@ router.get('/library/card', async ctx => {
         return ctx.status = 401
     }
     const person = await searchIdp(token)
-    //console.log(person)
+    console.log(person.data)
     const ssn = person.data.ssn
     const personData = {
         "username": person.data.preferred_username,
@@ -206,13 +206,13 @@ router.post('/library/card', async ctx => {
         const newPin = ctx.request.body.pin1
         const newPin2 = ctx.request.body.pin2
         const addedPin = await postNewPin(newPin, newPin2, patronId)
-        .then((result) => {
-            ctx.response.status = 200
-        }).catch((error) => {
-            // TODO: onko hyvä lähettää Kohan antama virhekoodi eteenpäin vai laittaa responseen joku oma/omat?
-            ctx.response.status = error.response.status
-            ctx.error.error = "error with adding pin code"
-        })
+            .then((result) => {
+                ctx.response.status = 200
+            }).catch((error) => {
+                // TODO: onko hyvä lähettää Kohan antama virhekoodi eteenpäin vai laittaa responseen joku oma/omat?
+                ctx.response.status = error.response.status
+                ctx.error.error = "error with adding pin code"
+            })
     }
     // TODO: lähetetään myös käyttäjätunnus, tallennetaan johonkin Kohan kenttään ja voidaan myöhemmin hakea sillä
     // TODO: otetaan patron_id talteen, lähetetään sillä pin-koodi perässä `${baseAddress}/patrons/{patron_id}/password`
@@ -230,12 +230,12 @@ router.post('/library/card/pin', async ctx => {
     const patronId = result.data[0].patron_id
     console.log(patronId)
     const changedPin = await postNewPin(newPin, newPin2, patronId)
-    .then((result) => {
-        ctx.response.status = 200
-    }).catch((error) => {
-        // TODO: onko hyvä lähettää Kohan antama virhekoodi eteenpäin vai laittaa responseen joku oma/omat?
-        ctx.response.status = error.response.status
-    })
+        .then((result) => {
+            ctx.response.status = 200
+        }).catch((error) => {
+            // TODO: onko hyvä lähettää Kohan antama virhekoodi eteenpäin vai laittaa responseen joku oma/omat?
+            ctx.response.status = error.response.status
+        })
     /*await axios({
         method: "post", url: `${baseAddress}/patrons/${patronId}/password`, headers: {
             'Authorization': `Basic ${process.env.BASIC}`
