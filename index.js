@@ -30,8 +30,10 @@ const checkSsn = (candidateData, ssn) => {
     return
 }
 
-const getPatron = async (personData, ssn) => {
+const getPatron = async (personData) => {
 
+    const ssn = personData.ssn
+    
     // search by username
     let candidates = await axios.get(`${baseAddress}/patrons/?altcontact_firstname=${personData.username}`, {
         headers: {
@@ -116,15 +118,11 @@ const getToken = ctx => {
 
 
 router.get('/library/card', async ctx => {
-    // asiakastietojen ja sieltä kortin numeron haku (Kohasta)
     const token = getToken(ctx)
     if (!token) {
-        // TADAA! TÄMÄ ON OIKEA TAPA PALAUTTAA SAMAN TIEN JATKAMATTA FUNKTIOTA LOPPUUN!!
         return ctx.status = 401
     }
     const person = await searchIdp(token)
-    console.log(person.data)
-    const ssn = person.data.ssn
     const personData = {
         "username": person.data.preferred_username,
         "firstname": person.data.given_name,
@@ -132,10 +130,10 @@ router.get('/library/card', async ctx => {
         "email": person.data.email,
         "streetAddress": person.data.home_street_address,
         "zip": person.data.home_zip_code,
-        "city": person.data.home_city
+        "city": person.data.home_city, 
+        "ssn": person.data.ssn
     }
-    const patron = await getPatron(personData, ssn)
-    //console.log(patron)
+    const patron = await getPatron(personData)
     if (!patron) {
         return ctx.status = 404
     }
