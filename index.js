@@ -20,6 +20,21 @@ const baseAddress = "https://app1.jyu.koha.csc.fi/api/v1/"
 
 let nextCardnumber = 2500300000
 
+const faculties = {
+    AVOIN : "T",
+    HYTK : "H",
+    IT : "I",
+    JSBE : "J",	
+    KPTK : "S",	
+    KTL : "E",
+    KYC : "E",
+    MLTK : "M",
+    MOVI : "E",
+    OSC : "E",
+    SPORT : "L",
+    YOP : "E"
+}
+
 const checkSsn = (candidateData, ssn) => {
     for (cand of candidateData) {
         const candSsn = (cand.extended_attributes[0].value)
@@ -101,8 +116,8 @@ const postNewPin = async (newPin, newPin2, patronId) => {
         method: "post", url: `${baseAddress}/patrons/${patronId}/password`, headers: {
             'Authorization': `Basic ${process.env.BASIC}`
         }, data: {
-            "password": newPin,
-            "password_2": newPin2
+            password: newPin,
+            password_2: newPin2
         }
     })
     console.log(changedPin.config.data)
@@ -122,22 +137,23 @@ router.get('/library/card', async ctx => {
         return ctx.status = 401
     }
     const person = await searchIdp(token)
+    console.log(person.data)
     const personData = {
-        "username": person.data.preferred_username,
-        "firstname": person.data.given_name,
-        "surname": person.data.family_name,
-        "email": person.data.email,
-        "streetAddress": person.data.home_street_address,
-        "zip": person.data.home_zip_code,
-        "city": person.data.home_city, 
-        "ssn": person.data.ssn
+        username: person.data.preferred_username,
+        firstname: person.data.given_name,
+        surname: person.data.family_name,
+        email: person.data.email,
+        streetAddress: person.data.home_street_address,
+        zip: person.data.home_zip_code,
+        city: person.data.home_city, 
+        ssn: person.data.ssn
     }
     const patron = await getPatron(personData)
     if (!patron) {
         return ctx.status = 404
     }
     ctx.body = {
-        "cardnumber": patron.cardnumber
+        cardnumber: patron.cardnumber
     }
 })
 
@@ -154,24 +170,24 @@ router.post('/library/card', async ctx => {
 
     // TODO: tähän tietenkin post requestissa tuleva data + idp:stä haetut tiedot tilalle
     const data = {
-        "address": "testikatu 7",
-        "city": "jyväskylä",
-        "postal_code": "40100",
-        "cardnumber": "2500300011",
-        "firstname": "otso oliver",
-        "surname": "opiskelija",
-        "other_name": "opiskelija, otso oliver",
-        "email": "otso.opiskelija@jyu.fi",
-        "phone": "09876443",
-        "date_of_birth": "2000-04-04",
-        "category_id": "S",
-        "library_id": "CPL",
-        "userid": "2500300011",
-        "extended_attributes": [
-            { "type": "SSN", "value": "050500A1234" },
-            { "type": "STAT_CAT", "value": "ES" }
+        address: "testikatu 7", //IDP:stä
+        city: "jyväskylä", //IDP:stä
+        postal_code: "40100", //IDP:stä
+        cardnumber: "2500300011", //luodaan mobiilikortin numero
+        firstname: "otso oliver", //IDP:stä
+        surname: "opiskelija", //IDP:stä
+        other_name: "opiskelija, otso oliver", //IDP:stä
+        email: "otso.opiskelija@jyu.fi", //IDP:stä
+        phone: "09876443",  //asiakas syöttää itse!
+        date_of_birth: "2000-04-04", //IDP:stä
+        category_id: "S", //IDP:stä (STUDENT/STAFF, Kohan API vaatii!)
+        library_id: "CPL", //kaikille Lähde? (Nyt Mattila?)
+        userid: "2500300011", //tähän kopioidaan mobiilikortin numero
+        extended_attributes: [
+            { type: "SSN", value: "050500A1234" }, //IDP:stä
+            { type: "STAT_CAT", value: "ES" } //IDP:stä, yhdistetään student/staff ja tdk
         ],
-        "altcontact_firstname": "otolopis"
+        altcontact_firstname: "otolopis"
     }
     console.log("aiotaan postata asiakas")
     // TODO: tämä axios ei toimi, jos asiakas on jo tietokannassa (409?)
@@ -219,14 +235,14 @@ router.post('/library/card/pin', async ctx => {
     }
     const person = await searchIdp(token)
     const personData = {
-        "username": person.data.preferred_username,
-        "firstname": person.data.given_name,
-        "surname": person.data.family_name,
-        "email": person.data.email,
-        "streetAddress": person.data.home_street_address,
-        "zip": person.data.home_zip_code,
-        "city": person.data.home_city, 
-        "ssn": person.data.ssn
+        username: person.data.preferred_username,
+        firstname: person.data.given_name,
+        surname: person.data.family_name,
+        email: person.data.email,
+        streetAddress: person.data.home_street_address,
+        zip: person.data.home_zip_code,
+        city: person.data.home_city, 
+        ssn: person.data.ssn
     }
     const patron = await getPatron(personData)
     if (!patron) {
