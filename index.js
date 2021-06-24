@@ -14,10 +14,10 @@ app.use(bodyParser({
 
 const router = new Router()
 
-//TODO: Koha-apin base-osoite käyttöön
-//const baseAddress = "https://koha3-kktest.lib.helsinki.fi/api/v1"
-const baseAddress = "https://app1.jyu.koha.csc.fi/api/v1/"
+const testBaseAddress = "https://koha3-kktest.lib.helsinki.fi/api/v1"
+const baseAddress = "https://app1.jyu.koha.csc.fi/api/v1"
 
+// TODO: miten varmistetaan, että uudelleenkäynnistys ei nollaa numeroa?
 let nextCardnumber = 2500300000
 
 const faculties = {
@@ -33,6 +33,11 @@ const faculties = {
     OSC : "E",
     SPORT : "L",
     YOP : "E"
+}
+
+const category = {
+    student : "E",
+    staff : "B"
 }
 
 const checkSsn = (candidateData, ssn) => {
@@ -63,10 +68,7 @@ const getPatron = async (personData) => {
 
     // search by firstname and surname
     const firstname = personData.firstname.split(" ")[0]
-    // TODO: käytä tuotannossa suku + etu -hakua (oma testi vain sukunimellä)
     candidates = await axios.get(`${baseAddress}/patrons/?surname=${personData.surname}&firstname=${firstname}`, {
-    //candidates = await axios.get(`${baseAddress}/patrons/?surname=${personData.surname}`, {    
-    //candidates = await axios.get(`${baseAddress}/patrons/?surname=iodjdguihudhd`, {
         headers: {
             'Authorization': `Basic ${process.env.BASIC}`,
             'x-koha-embed': 'extended_attributes'
@@ -112,7 +114,7 @@ const searchIdp = async (token) => {
 }
 
 const postNewPin = async (newPin, newPin2, patronId) => {
-    const changedPin = await axios({
+    await axios({
         method: "post", url: `${baseAddress}/patrons/${patronId}/password`, headers: {
             'Authorization': `Basic ${process.env.BASIC}`
         }, data: {
@@ -120,7 +122,6 @@ const postNewPin = async (newPin, newPin2, patronId) => {
             password_2: newPin2
         }
     })
-    console.log(changedPin.config.data)
 }
 
 const getToken = ctx => {
@@ -131,13 +132,34 @@ const getToken = ctx => {
     return null
 }
 
+const getDateOfBirth = (ssn) => {
+
+    let century = null
+    if (ssn[6] == "-") {
+        century = "19"
+    } else if (ssn[6] == "A") {
+        century = "20"
+    }
+    const year = century + ssn.substr(4,2)
+    const month = ssn.substr(2,2)
+    const day = ssn.substr(0,2)
+
+    return year + "-" + month + "-" + day
+}
+
+const getNextCardbumber = () => {
+    const nextNumber = nextCardnumber
+    nextCardnumber++
+    return nextNumber
+}
+
 router.get('/library/card', async ctx => {
     const token = getToken(ctx)
     if (!token) {
         return ctx.status = 401
     }
     const person = await searchIdp(token)
-    console.log(person.data)
+
     const personData = {
         username: person.data.preferred_username,
         firstname: person.data.given_name,
@@ -158,7 +180,6 @@ router.get('/library/card', async ctx => {
 })
 
 //uuden asiakkaan luominen Kohaan
-// TODO: mietittävä, mitkä as.tiedot otetaan IDP:stä ja mitkä asiakas saa antaa itse
 router.post('/library/card', async ctx => {
 
     const token = getToken(ctx)
@@ -167,62 +188,57 @@ router.post('/library/card', async ctx => {
     }
     const person = await searchIdp(token)
 
+    const categoryCode = category[person.data.roles[0]] + faculties[person.data.faculty_code]
 
-    // TODO: tähän tietenkin post requestissa tuleva data + idp:stä haetut tiedot tilalle
+    const cardnumber = getNextCardbumber()
+
+    const dateOfBirth = getDateOfBirth(person.data.ssn)
+
     const data = {
-        address: "testikatu 7", //IDP:stä
-        city: "jyväskylä", //IDP:stä
-        postal_code: "40100", //IDP:stä
-        cardnumber: "2500300011", //luodaan mobiilikortin numero
-        firstname: "otso oliver", //IDP:stä
-        surname: "opiskelija", //IDP:stä
-        other_name: "opiskelija, otso oliver", //IDP:stä
-        email: "otso.opiskelija@jyu.fi", //IDP:stä
-        phone: "09876443",  //asiakas syöttää itse!
-        date_of_birth: "2000-04-04", //IDP:stä
-        category_id: "S", //IDP:stä (STUDENT/STAFF, Kohan API vaatii!)
-        library_id: "CPL", //kaikille Lähde? (Nyt Mattila?)
-        userid: "2500300011", //tähän kopioidaan mobiilikortin numero
+        address: ctx.request.body.address,
+        city: ctx.request.body.city,
+        postal_code: ctx.request.body.postal_code,
+        cardnumber: cardnumber,
+        firstname: person.data.given_name,
+        surname: person.data.family_name,
+        other_name: person.data.name,
+        email: ctx.request.body.email,
+        phone: ctx.request.body.phone,
+        date_of_birth: dateOfBirth,
+        category_id: person.data.roles[0].toUpperCase(), //IDP:stä (STUDENT/STAFF, Kohan API vaatii!)
+        library_id: "MATTILA", //kaikille Lähde? (Nyt Mattila?)
+        userid: cardnumber,
         extended_attributes: [
-            { type: "SSN", value: "050500A1234" }, //IDP:stä
-            { type: "STAT_CAT", value: "ES" } //IDP:stä, yhdistetään student/staff ja tdk
+            { type: "SSN", value: person.data.ssn },
+            { type: "STAT_CAT", value: categoryCode }
         ],
-        altcontact_firstname: "otolopis"
+        altcontact_firstname: person.data.preferred_username
     }
-    console.log("aiotaan postata asiakas")
-    // TODO: tämä axios ei toimi, jos asiakas on jo tietokannassa (409?)
-    const newPatron = await axios({
+
+    let newPatron = null
+    try {
+        newPatron = await axios({
         method: "post", url: `${baseAddress}/patrons`, headers: {
             'Authorization': `Basic ${process.env.BASIC}`
         }, data
-    })  //TODO: tämä virheenkäsittely ei toimi. (?) Miten päätetään reitin suoritus tähän, jos ei luotu uutta?
-        // TODO: tuolla return ctx.status -jutulla
-    /*.catch((error) => {
-        // TODO: onko hyvä lähettää Kohan antama virhekoodi eteenpäin vai laittaa responseen joku oma/omat?
-        ctx.response.status = error.response.status
-        ctx.body = {
-            "error": "error with adding new patron"
-        } 
-    })*/
-    console.log("asiakas postattu")
-    console.log(newPatron)
+    })
+    } catch (error) {
+        return ctx.status = error.response.status
+    }
+
     if (!newPatron.data.patron_id) {
-        ctx.response.status = 500
+        ctx.status = 500
     } else {
         const patronId = newPatron.data.patron_id
         const newPin = ctx.request.body.pin1
         const newPin2 = ctx.request.body.pin2
-        const addedPin = await postNewPin(newPin, newPin2, patronId)
-            .then((result) => {
-                ctx.response.status = 200
-            }).catch((error) => {
-                // TODO: onko hyvä lähettää Kohan antama virhekoodi eteenpäin vai laittaa responseen joku oma/omat?
-                ctx.response.status = error.response.status
-                ctx.error.error = "error with adding pin code"
-            })
+        try {
+            await postNewPin(newPin, newPin2, patronId)
+            return ctx.status = 200
+        } catch (error) {
+            return ctx.status = error.response.status
+        }
     }
-    // TODO: lähetetään myös käyttäjätunnus, tallennetaan johonkin Kohan kenttään ja voidaan myöhemmin hakea sillä
-    // TODO: otetaan patron_id talteen, lähetetään sillä pin-koodi perässä `${baseAddress}/patrons/{patron_id}/password`
 })
 
 
@@ -248,7 +264,6 @@ router.post('/library/card/pin', async ctx => {
     if (!patron) {
         return ctx.status = 404
     }
-    console.log("patron_id: " + patron.patron_id)
     const patronId = patron.patron_id
     const newPin = ctx.request.body.pin1
     const newPin2 = ctx.request.body.pin2
@@ -257,35 +272,11 @@ router.post('/library/card/pin', async ctx => {
         .then(() => {
             ctx.response.status = 200
         }).catch((error) => {
-            // TODO: onko hyvä lähettää Kohan antama virhekoodi eteenpäin vai laittaa responseen joku oma/omat?
-            // jos pin1 ja pin2 ei ole samat, Koha antaa 400 Bad request
-            // samoin jos pin1 tai pin2 puuttuu bodysta
             ctx.response.status = error.response.status
         })
 })
 
-// tätä ei ehkä tarvita? PIN-koodia ei ole mahdollista saada tätä kautta
-//olennaisimpien asiakastietojen haku ja palautus MyJYU:un
-/*router.get('/library/patron', async ctx => {
-    const result = await getPatron()
-    console.log(result.data)
-    const patron = result.data[0]
-    ctx.body = {
-        "address": patron.address,
-        "cardnumber": patron.cardnumber,
-        "city": patron.city,
-        "date_of_birth": patron.date_of_birth,
-        "email": patron.email,
-        "firstname": patron.firstname,
-        "mobile": patron.mobile,
-        "phone": patron.phone,
-        "postal_code": patron.postal_code,
-        "surname": patron.surname,
-        "userid": patron.userid
-    }
-})*/
-
 app.use(router.routes())
 
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`running on port ${PORT}`));
+const PORT = process.env.PORT || 3000
+app.listen(PORT, () => console.log(`running on port ${PORT}`))
