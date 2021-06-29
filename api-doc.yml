@@ -3,9 +3,9 @@ info:
   title: MyJYU library card api
   version: '1.0.0'
 paths:
-  /test:
+  /card:
     post:
-      description: Echo back the request body to test type coercion
+      description: Create new patron to library information sytem Koha
       requestBody:
         required: true
         content:
@@ -15,24 +15,22 @@ paths:
               required:
                 - name
               properties:
-                name:
+                address:
                   type: string
-                age:
-                  type: integer
-                isCool:
-                  type: boolean
+                postal_code:
+                  type: string
+                city:
+                  type: string
+                email:
+                  type: string
+                phone:
+                  type: string
+                pin1:
+                  type: string
+                pin2:
+                  type: string
                   x-openapi-coercion-strict: true
       responses:
         200:
           description: An echo of the request body.
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  name:
-                    type: string
-                  age:
-                    type: integer
-                  isCool:
-                    type: boolean
+        # virheresponset

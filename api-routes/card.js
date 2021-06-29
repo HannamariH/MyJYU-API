@@ -30,7 +30,6 @@ async function get(ctx) {
         return ctx.status = 401
     }
     const person = await searchIdp(token)
-
     const personData = {
         username: person.data.preferred_username,
         firstname: person.data.given_name,
@@ -94,7 +93,6 @@ async function post(ctx) {
         }, data
     })
     } catch (error) {
-        console.log(error)
         return ctx.status = error.response.status
     }
 
