@@ -1,8 +1,11 @@
+"use strict"
+
 require('dotenv').config()
 const Koa = require('koa')
 const Router = require('koa-router')
 const axios = require('axios')
 const bodyParser = require('koa-body')
+const openapi = require('koa-openapi')
 
 
 const app = new Koa()
@@ -13,6 +16,13 @@ app.use(bodyParser({
 }))
 
 const router = new Router()
+
+openapi.initialize({
+    apiDoc: fs.readFileSync(path.resolve(__dirname, 'api-doc.yml'), 'utf8'),
+    router,
+    paths: path.resolve(__dirname, 'api-routes'),
+  })
+  
 
 const testBaseAddress = "https://koha3-kktest.lib.helsinki.fi/api/v1"
 const baseAddress = "https://app1.jyu.koha.csc.fi/api/v1"
