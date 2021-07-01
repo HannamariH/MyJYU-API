@@ -8,6 +8,7 @@ const bodyParser = require('koa-body')
 const openapi = require('koa-openapi')
 const fs = require('fs')
 const path = require('path')
+const winston = require('winston')
 
 
 const app = new Koa()
@@ -18,6 +19,24 @@ app.use(bodyParser({
 }))
 
 const router = new Router()
+const errorLogger = winston.createLogger({
+    transports: [
+        new winston.transports.File({
+            filename: "./logs/error.log",
+            level: "error"
+        })
+    ]
+})
+
+const infoLogger = winston.createLogger({
+    transports: [
+        new winston.transports.File({
+            filename: "./logs/cardnumber.log",
+            level: "info"
+        })
+    ]
+})
+
 
 openapi.initialize({
     apiDoc: fs.readFileSync(path.resolve(__dirname, 'api-doc.yml'), 'utf8'),
