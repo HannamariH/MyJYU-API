@@ -4,6 +4,30 @@ info:
   version: '1.0.0'
 paths:
   /card:
+    get:
+      description: Get user's library card number
+      responses:
+        200:
+          description: Library card number
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  cardnumber:
+                    type: string
+        400:
+          description: Default response
+        401:
+          description: Authentication required
+        403:
+          description: Access forbidden
+        404:
+          description: Resource not found
+        500:
+          description: Internal server error
+        501:
+          description: Default response
     post:
       description: Create new patron to library information sytem Koha
       requestBody:
@@ -13,7 +37,13 @@ paths:
             schema:
               type: object
               required:
-                - name
+                - address
+                - postal_code
+                - city
+                - email
+                - phone
+                - pin1
+                - pin2
               properties:
                 address:
                   type: string
@@ -29,8 +59,61 @@ paths:
                   type: string
                 pin2:
                   type: string
-                  x-openapi-coercion-strict: true
+              x-openapi-coercion-strict: true
+      responses:
+        201:
+          description: Library card created
+        400:
+          description: Bad parameter
+        401:
+          description: Authentication required
+        403:
+          description: Access forbidden
+        404:
+          description: Resource not found
+        409:
+          description: Conflict in creating resource
+        500:
+          description: Internal server error
+        501:
+          description: Default response
+        503:
+          description: Under maintenance
+  /card/pin:
+    post:
+      description: Change card's pin code
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - pin1
+                - pin2
+              properties:
+                pin1:
+                  type: string
+                pin2:
+                  type: string
+              x-openapi-coercion-strict: true
       responses:
         200:
-          description: An echo of the request body.
-        # virheresponset
+          description: Pin code changed
+        400:
+          description: Bad request
+        401:
+          description: Authentication required
+        403:
+          description: Access forbidden
+        404:
+          description: Patron not found
+        500:
+          description: Internal server error
+        501:
+          description: Default response
+        503:
+          description: Under maintenance
+
+        
+
