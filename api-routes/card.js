@@ -95,6 +95,17 @@ async function post(ctx) {
     })
     } catch (error) {
         //TODO: 409, jos sama korttinro on jo käytössä. Pitäis käsitellä tässä!
+        let errorMessage = error.response.data.error
+        if (errorMessage.includes("Your action breaks a unique constraint on the attribute. type=SSN")) {
+            errorMessage = "Your action breaks a unique constraint on the attribute. type=SSN"
+        }
+        errorLogger.error({
+            timestamp: new Date().toLocaleString(),
+            message: errorMessage,
+            status: error.response.status,
+            url: error.config.url,
+            method: "post"
+        })
         return ctx.status = error.response.status
     }
 
@@ -114,6 +125,14 @@ async function post(ctx) {
                 }*/
             
         } catch (error) {
+            //TODO: poistetaanko tässä pin-kooditon asiakas?
+            errorLogger.error({
+                timestamp: new Date().toLocaleString(),
+                message: error.response.data.error,
+                status: error.response.status,
+                url: error.config.url,
+                method: "post"
+            })
             return ctx.status = error.response.status
         }
     }
