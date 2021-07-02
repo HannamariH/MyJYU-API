@@ -1,8 +1,10 @@
 'use strict'
 
 const axios = require('axios')
-const { getToken, searchIdp, getPatron, postNewPin, getNextCardnumber, getDateOfBirth, baseAddress, testBaseAddress } = require("../utils")
+const fs = require('fs')
+const { getToken, searchIdp, getPatron, postNewPin, getDateOfBirth, baseAddress, testBaseAddress } = require("../utils")
 const { errorLogger, infoLogger } = require("../loggers")
+const { CLIENT_RENEG_LIMIT } = require('tls')
 
 const faculties = {
     AVOIN : "T",
@@ -22,6 +24,29 @@ const faculties = {
 const category = {
     student : "E",
     staff : "B"
+}
+
+const getNextCardnumber = () => {
+    try {
+        const lastNumber = fs.readFileSync("logs/cardnumber.log", "utf8")
+        return parseInt(lastNumber)+1
+    } catch (error) {
+        errorLogger.error({
+            timestamp: new Date().toLocaleString(),
+            message: "Could not read cardnumber.log"
+        })
+    }
+}
+
+const logUsedCardnumber = (number) => {
+    try {
+        fs.writeFileSync("logs/cardnumber.log", number.toString())
+    } catch (error) {
+        errorLogger.error({
+            timestamp: new Date().toLocaleString(),
+            message: "Could not write to cardnumber.log"
+        })
+    }
 }
 
 
@@ -80,7 +105,7 @@ async function post(ctx) {
         userid: cardnumber,
         extended_attributes: [
             //{ type: "SSN", value: person.data.ssn },
-            { type: "SSN", value: "010101-0101" },
+            { type: "SSN", value: "040101-0101" },
             { type: "STAT_CAT", value: categoryCode }
         ],
         altcontact_firstname: person.data.preferred_username
@@ -112,6 +137,7 @@ async function post(ctx) {
     if (!newPatron.data.patron_id) {
         ctx.status = 500
     } else {
+        logUsedCardnumber(cardnumber)
         const patronId = newPatron.data.patron_id
         const newPin = ctx.request.body.pin1
         const newPin2 = ctx.request.body.pin2
