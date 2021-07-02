@@ -2,6 +2,7 @@
 
 const axios = require('axios')
 const { getToken, searchIdp, getPatron, postNewPin, getNextCardnumber, getDateOfBirth, baseAddress, testBaseAddress } = require("../utils")
+const { errorLogger, infoLogger } = require("../loggers")
 
 const faculties = {
     AVOIN : "T",
@@ -78,7 +79,8 @@ async function post(ctx) {
         library_id: "MATTILA", //kaikille Lähde? (Nyt Mattila?)
         userid: cardnumber,
         extended_attributes: [
-            { type: "SSN", value: person.data.ssn },
+            //{ type: "SSN", value: person.data.ssn },
+            { type: "SSN", value: "010101-0101" },
             { type: "STAT_CAT", value: categoryCode }
         ],
         altcontact_firstname: person.data.preferred_username
@@ -107,6 +109,10 @@ async function post(ctx) {
             //TODO: tarvitaanko responseen bodya? jos, niin päivitä yaml
             // joo, vois palauttaa patronId:n, niin voi testatessa poistaakin sillä
             return ctx.status = 201
+                /*ctx.body = {
+                    patronId : patron_id
+                }*/
+            
         } catch (error) {
             return ctx.status = error.response.status
         }
