@@ -1,6 +1,7 @@
 'use strict'
 
 const { getToken, searchIdp, getPatron, postNewPin } = require("../../utils")
+const { errorLogger } = require("../../loggers")
 
 async function post(ctx) {
     const token = getToken(ctx)
@@ -30,6 +31,13 @@ async function post(ctx) {
         .then(() => {
             ctx.response.status = 200
         }).catch((error) => {
+            errorLogger.error({
+                timestamp: new Date().toLocaleString(),
+                message: error.response.data.error,
+                status: error.response.status,
+                url: error.config.url,
+                method: "post"
+            })
             ctx.response.status = error.response.status
         })
 }

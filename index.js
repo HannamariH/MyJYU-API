@@ -3,11 +3,11 @@
 require('dotenv').config()
 const Koa = require('koa')
 const Router = require('koa-router')
-const axios = require('axios')
 const bodyParser = require('koa-body')
 const openapi = require('koa-openapi')
 const fs = require('fs')
 const path = require('path')
+
 
 
 const app = new Koa()
@@ -18,6 +18,7 @@ app.use(bodyParser({
 }))
 
 const router = new Router()
+
 
 openapi.initialize({
     apiDoc: fs.readFileSync(path.resolve(__dirname, 'api-doc.yml'), 'utf8'),

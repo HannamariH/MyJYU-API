@@ -5,8 +5,6 @@ const axios = require('axios')
 const testBaseAddress = "https://koha3-kktest.lib.helsinki.fi/api/v1"
 const baseAddress = "https://app1.jyu.koha.csc.fi/api/v1"
 
-// TODO: luetaan tiedostosta
-let nextCardnumber = 2500300000
 
 const checkSsn = (candidateData, ssn) => {
     for (const cand of candidateData) {
@@ -115,10 +113,4 @@ const getDateOfBirth = (ssn) => {
     return year + "-" + month + "-" + day
 }
 
-const getNextCardnumber = () => {
-    const nextNumber = nextCardnumber
-    nextCardnumber++
-    return nextNumber
-}
-
-module.exports = { getToken, searchIdp, getDateOfBirth, getNextCardnumber, getPatron, checkSsn, postNewPin, baseAddress, testBaseAddress }
+module.exports = { getToken, searchIdp, getDateOfBirth, getPatron, checkSsn, postNewPin, baseAddress, testBaseAddress }
