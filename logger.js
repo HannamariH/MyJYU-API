@@ -12,13 +12,4 @@ const errorLogger = winston.createLogger({
     ]
 })
 
-const infoLogger = winston.createLogger({
-    transports: [
-        new winston.transports.File({
-            filename: "./logs/cardnumber.log",
-            level: "info"
-        })
-    ]
-})
-
-module.exports = { errorLogger, infoLogger }
+module.exports = { errorLogger }

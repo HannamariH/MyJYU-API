@@ -3,7 +3,7 @@
 const axios = require('axios')
 const fs = require('fs')
 const { getToken, searchIdp, getPatron, postNewPin, getDateOfBirth, baseAddress, testBaseAddress } = require("../utils")
-const { errorLogger, infoLogger } = require("../loggers")
+const { errorLogger } = require("../logger")
 
 const faculties = {
     AVOIN: "T",

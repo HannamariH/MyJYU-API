@@ -1,8 +1,6 @@
 'use strict'
 
 const axios = require('axios')
-const fs = require('fs')
-const { errorLogger, infoLogger } = require("./loggers")
 
 const testBaseAddress = "https://koha3-kktest.lib.helsinki.fi/api/v1"
 const baseAddress = "https://app1.jyu.koha.csc.fi/api/v1"
