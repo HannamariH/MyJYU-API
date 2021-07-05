@@ -1,7 +1,7 @@
 'use strict'
 
 const { getToken, searchIdp, getPatron, postNewPin } = require("../../utils")
-const { errorLogger } = require("../../loggers")
+const { errorLogger } = require("../../logger")
 
 async function post(ctx) {
     const token = getToken(ctx)

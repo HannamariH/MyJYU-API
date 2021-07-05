@@ -91,7 +91,12 @@ async function get(ctx) {
     if (!token) {
         return ctx.status = 401
     }
-    const person = await searchIdp(token)
+    let person = null
+    try {
+        person = await searchIdp(token)
+    } catch (error) {
+        return ctx.status = error.response.status
+    }
     const personData = {
         username: person.data.preferred_username,
         firstname: person.data.given_name,
@@ -117,8 +122,12 @@ async function post(ctx) {
     if (!token) {
         return ctx.status = 401
     }
-    const person = await searchIdp(token)
-
+    let person = null
+    try {
+        person = await searchIdp(token)
+    } catch (error) {
+        return ctx.status = error.response.status
+    }
     const categoryCode = category[person.data.roles[0]] + faculties[person.data.faculty_code]
 
     const cardnumber = getNextCardnumber()
@@ -167,10 +176,11 @@ async function post(ctx) {
             await postNewPin(newPin, newPin2, patronId)
             //TODO: tarvitaanko responseen bodya? jos, niin päivitä yaml
             // joo, vois palauttaa patronId:n, niin voi testatessa poistaakin sillä
-            return ctx.status = 201
-            /*ctx.body = {
+            ctx.status = 201
+            ctx.request.body = {
                 patronId : patron_id
-            }*/
+            }
+            return
         } catch (error) {
             //TODO: poistetaanko tässä pin-kooditon asiakas?
             errorLogger.error({
@@ -185,8 +195,13 @@ async function post(ctx) {
     }
 }
 
+async function remove(ctx) {
 
+}
+
+// TODO: miten delete-funktio nimetään/exportataan?
 module.exports = {
     get: get,
-    post: post
+    post: post,
+    remove: remove
 }
