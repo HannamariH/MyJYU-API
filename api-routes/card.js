@@ -4,6 +4,7 @@ const axios = require('axios')
 const fs = require('fs')
 const { getToken, searchIdp, getPatron, postNewPin, getDateOfBirth, baseAddress, testBaseAddress } = require("../utils")
 const { errorLogger } = require("../logger")
+const { removePatron } = require("./card/{patron_id}")
 
 const faculties = {
     AVOIN: "T",
@@ -62,7 +63,9 @@ const savePatron = async (data) => {
             data.userid = data.cardnumber
             return await savePatron(data)
         } else {
-            let errorMessage = error.response.data.error
+            // TODO: error.response voi olla undefined, esim. kun Kohaan ei saa yhteyttä!
+            // {patron_id}.js:ssä käsitelty: sama tähän ja pin.js:ään? Vai jopa joku middleware?
+            let errorMessage = error.response.data.error 
             if (errorMessage.includes("Your action breaks a unique constraint on the attribute. type=SSN")) {
                 errorMessage = "Your action breaks a unique constraint on the attribute. type=SSN"
             }
@@ -151,7 +154,7 @@ async function post(ctx) {
         userid: cardnumber,
         extended_attributes: [
             //{ type: "SSN", value: person.data.ssn },
-            { type: "SSN", value: "050101-0101" },
+            { type: "SSN", value: "040101-0101" },
             { type: "STAT_CAT", value: categoryCode }
         ],
         altcontact_firstname: person.data.preferred_username
@@ -181,8 +184,22 @@ async function post(ctx) {
             }
             return
         } catch (error) {
-            console.log(error)
-            //TODO: poistetaanko tässä pin-kooditon asiakas?
+            let removed = null
+            try {
+                removed = await removePatron(patronId)
+            } catch (error) {
+                errorLogger.error({
+                    timestamp: new Date().toLocaleString(),
+                    message: "Could not remove patron whose pin code is missing",
+                    status: removed,
+                    method: "delete"
+                })
+                ctx.status = removed
+                ctx.response.body = {
+                    message: "Could not remove patron whose pin code is missing"
+                }
+                return
+            }            
             errorLogger.error({
                 timestamp: new Date().toLocaleString(),
                 message: error.response.data.error,
@@ -195,13 +212,7 @@ async function post(ctx) {
     }
 }
 
-async function remove(ctx) {
-
-}
-
-// TODO: miten delete-funktio nimetään/exportataan?
 module.exports = {
     get: get,
-    post: post,
-    delete: remove
+    post: post
 }
