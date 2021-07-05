@@ -72,7 +72,7 @@ paths:
         404:
           description: Resource not found
         409:
-          description: Conflict in creating resource
+          description: Card with given SSN already exists
         500:
           description: Internal server error
         501:
