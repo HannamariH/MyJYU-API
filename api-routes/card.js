@@ -140,7 +140,8 @@ async function post(ctx) {
         library_id: "MATTILA", //kaikille Lähde? (Nyt Mattila?)
         userid: cardnumber,
         extended_attributes: [
-            { type: "SSN", value: person.data.ssn },
+            //{ type: "SSN", value: person.data.ssn },
+            { type: "SSN", value: "070101-0101" },
             { type: "STAT_CAT", value: categoryCode }
         ],
         altcontact_firstname: person.data.preferred_username
@@ -158,7 +159,7 @@ async function post(ctx) {
     } else if (newPatron == 409) {
         return ctx.status = 409
     } else {
-        logUsedCardnumber(cardnumber)
+        logUsedCardnumber(newPatron.data.cardnumber)
         const patronId = newPatron.data.patron_id
         const newPin = ctx.request.body.pin1
         const newPin2 = ctx.request.body.pin2
