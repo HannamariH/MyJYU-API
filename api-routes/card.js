@@ -107,6 +107,7 @@ async function get(ctx) {
         city: person.data.home_city,
         ssn: person.data.ssn
     }
+    // TODO: pitäiskö laittaa try catchiin?
     const patron = await getPatron(personData)
     if (!patron) {
         return ctx.status = 404
@@ -150,7 +151,7 @@ async function post(ctx) {
         userid: cardnumber,
         extended_attributes: [
             //{ type: "SSN", value: person.data.ssn },
-            { type: "SSN", value: "070101-0101" },
+            { type: "SSN", value: "050101-0101" },
             { type: "STAT_CAT", value: categoryCode }
         ],
         altcontact_firstname: person.data.preferred_username
@@ -174,14 +175,13 @@ async function post(ctx) {
         const newPin2 = ctx.request.body.pin2
         try {
             await postNewPin(newPin, newPin2, patronId)
-            //TODO: tarvitaanko responseen bodya? jos, niin päivitä yaml
-            // joo, vois palauttaa patronId:n, niin voi testatessa poistaakin sillä
             ctx.status = 201
-            ctx.request.body = {
-                patronId : patron_id
+            ctx.response.body = {
+                patron_id : patronId
             }
             return
         } catch (error) {
+            console.log(error)
             //TODO: poistetaanko tässä pin-kooditon asiakas?
             errorLogger.error({
                 timestamp: new Date().toLocaleString(),
@@ -203,5 +203,5 @@ async function remove(ctx) {
 module.exports = {
     get: get,
     post: post,
-    remove: remove
+    delete: remove
 }

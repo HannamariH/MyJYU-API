@@ -63,6 +63,13 @@ paths:
       responses:
         201:
           description: Library card created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  patron_id:
+                    type: integer
         400:
           description: Bad parameter
         401:
