@@ -94,6 +94,7 @@ async function get(ctx) {
     if (!token) {
         return ctx.status = 401
     }
+
     let person = null
     try {
         person = await searchIdp(token)
@@ -110,15 +111,30 @@ async function get(ctx) {
         city: person.data.home_city,
         ssn: person.data.ssn
     }
-    // TODO: pitäiskö laittaa try catchiin?
-    const patron = await getPatron(personData)
-    if (!patron) {
-        return ctx.status = 404
+
+    let patron = null
+    try {
+        patron = await getPatron(personData)
+        if (!patron) {
+            return ctx.status = 404 
+        } 
+    } catch (error) {
+        errorLogger.error({
+            timestamp: new Date().toLocaleString(),
+            message: "Error searching Koha for the right patron",
+        })
+        ctx.response.status = 500
     }
+
     ctx.body = {
         cardnumber: patron.cardnumber
     }
 }
+
+
+
+
+
 
 
 async function post(ctx) {
@@ -126,6 +142,7 @@ async function post(ctx) {
     if (!token) {
         return ctx.status = 401
     }
+
     let person = null
     try {
         person = await searchIdp(token)

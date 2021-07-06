@@ -19,14 +19,26 @@ async function post(ctx) {
         city: person.data.home_city,
         ssn: person.data.ssn
     }
-    const patron = await getPatron(personData)
-    if (!patron) {
-        return ctx.status = 404
+
+    let patron = null
+    try {
+        patron = await getPatron(personData)
+        if (!patron) {
+            return ctx.status = 404 
+        } 
+    } catch (error) {
+        errorLogger.error({
+            timestamp: new Date().toLocaleString(),
+            message: "Error searching Koha for the right patron",
+            status: error.response.status
+        })
+        ctx.response.status = error.response.status
     }
     const patronId = patron.patron_id
     const newPin = ctx.request.body.pin1
     const newPin2 = ctx.request.body.pin2
 
+    // TODO: miksi tässä ei ole try/catchia?
     await postNewPin(newPin, newPin2, patronId)
         .then(() => {
             ctx.response.status = 200
