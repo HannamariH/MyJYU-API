@@ -30,7 +30,7 @@ const removePatron = async (patron_id) => {
                 method: "delete"
             })
             return error.response.status
-        }          
+        }      
     }
 }
 

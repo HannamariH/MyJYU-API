@@ -47,14 +47,24 @@ async function post(ctx) {
         await postNewPin(newPin, newPin2, patronId)
         ctx.response.status = 200
     } catch (error) {
-        errorLogger.error({
-            timestamp: new Date().toLocaleString(),
-            message: error.response.data.error,
-            status: error.response.status,
-            url: error.config.url,
-            method: "post"
-        })
-        ctx.response.status = error.response.status
+        if (error.response == undefined) {
+            errorLogger.error({
+                timestamp: new Date().toLocaleString(),
+                message: "Koha timeout",
+                url: error.config.url,
+                method: "post"
+            })
+            return 500
+        } else {
+            errorLogger.error({
+                timestamp: new Date().toLocaleString(),
+                message: error.response.data.error,
+                status: error.response.status,
+                url: error.config.url,
+                method: "post"
+            })
+            ctx.response.status = error.response.status
+        }        
     }
 }
 

@@ -7,17 +7,16 @@ const bodyParser = require('koa-body')
 const openapi = require('koa-openapi')
 const fs = require('fs')
 const path = require('path')
+const { errorLogger } = require("./logger")
 
 
 const app = new Koa()
+const router = new Router()
 
 app.use(bodyParser({
     multipart: true,
     urlencoded: true
 }))
-
-const router = new Router()
-
 
 openapi.initialize({
     apiDoc: fs.readFileSync(path.resolve(__dirname, 'api-doc.yml'), 'utf8'),
@@ -26,6 +25,8 @@ openapi.initialize({
 })
 
 app.use(router.routes())
+
 module.exports = app
+
 const PORT = process.env.PORT || 3000
 app.listen(PORT, () => console.log(`running on port ${PORT}`))
