@@ -2,7 +2,7 @@
 
 const axios = require('axios')
 const fs = require('fs')
-const { getToken, searchIdp, getPatron, postNewPin, getDateOfBirth, baseAddress, testBaseAddress } = require("../utils")
+const { getToken, searchIdp, getPatron, postNewPin, getDateOfBirth, baseAddress } = require("../utils")
 const { errorLogger } = require("../logger")
 const { removePatron } = require("./card/{patron_id}")
 

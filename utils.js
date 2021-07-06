@@ -2,9 +2,9 @@
 
 const axios = require('axios')
 
-const testBaseAddress = "https://koha3-kktest.lib.helsinki.fi/api/v1"
+// Testi-Kohan osoite
+//const baseAddress = "https://koha3-kktest.lib.helsinki.fi/api/v1"
 const baseAddress = "https://app1.jyu.koha.csc.fi/api/v1"
-
 
 const checkSsn = (candidateData, ssn) => {
     for (const cand of candidateData) {
@@ -107,4 +107,4 @@ const getDateOfBirth = (ssn) => {
     return year + "-" + month + "-" + day
 }
 
-module.exports = { getToken, searchIdp, getDateOfBirth, getPatron, checkSsn, postNewPin, baseAddress, testBaseAddress }
+module.exports = { getToken, searchIdp, getDateOfBirth, getPatron, checkSsn, postNewPin, baseAddress }
