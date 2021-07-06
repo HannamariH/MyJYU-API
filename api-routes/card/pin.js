@@ -8,7 +8,12 @@ async function post(ctx) {
     if (!token) {
         return ctx.status = 401
     }
-    const person = await searchIdp(token)
+    let person = null
+    try {
+        person = await searchIdp(token)
+    } catch (error) {
+        return ctx.status = error.response.status
+    }
     const personData = {
         username: person.data.preferred_username,
         firstname: person.data.given_name,
@@ -38,20 +43,19 @@ async function post(ctx) {
     const newPin = ctx.request.body.pin1
     const newPin2 = ctx.request.body.pin2
 
-    // TODO: miksi tässä ei ole try/catchia?
-    await postNewPin(newPin, newPin2, patronId)
-        .then(() => {
-            ctx.response.status = 200
-        }).catch((error) => {
-            errorLogger.error({
-                timestamp: new Date().toLocaleString(),
-                message: error.response.data.error,
-                status: error.response.status,
-                url: error.config.url,
-                method: "post"
-            })
-            ctx.response.status = error.response.status
+    try {
+        await postNewPin(newPin, newPin2, patronId)
+        ctx.response.status = 200
+    } catch (error) {
+        errorLogger.error({
+            timestamp: new Date().toLocaleString(),
+            message: error.response.data.error,
+            status: error.response.status,
+            url: error.config.url,
+            method: "post"
         })
+        ctx.response.status = error.response.status
+    }
 }
 
 module.exports = {
