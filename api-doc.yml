@@ -70,6 +70,8 @@ paths:
                 properties:
                   patron_id:
                     type: integer
+                  cardnumber:
+                    type: string
         400:
           description: Bad parameter
         401:

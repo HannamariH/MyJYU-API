@@ -180,7 +180,8 @@ async function post(ctx) {
             await postNewPin(newPin, newPin2, patronId)
             ctx.status = 201
             ctx.response.body = {
-                patron_id : patronId
+                patron_id : patronId,
+                cardnumber: newPatron.data.cardnumber
             }
             return
         } catch (error) {
