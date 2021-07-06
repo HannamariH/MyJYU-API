@@ -8,7 +8,12 @@ async function post(ctx) {
     if (!token) {
         return ctx.status = 401
     }
-    const person = await searchIdp(token)
+    let person = null
+    try {
+        person = await searchIdp(token)
+    } catch (error) {
+        return ctx.status = error.response.status
+    }
     const personData = {
         username: person.data.preferred_username,
         firstname: person.data.given_name,
@@ -19,18 +24,38 @@ async function post(ctx) {
         city: person.data.home_city,
         ssn: person.data.ssn
     }
-    const patron = await getPatron(personData)
-    if (!patron) {
-        return ctx.status = 404
+
+    let patron = null
+    try {
+        patron = await getPatron(personData)
+        if (!patron) {
+            return ctx.status = 404 
+        } 
+    } catch (error) {
+        errorLogger.error({
+            timestamp: new Date().toLocaleString(),
+            message: "Error searching Koha for the right patron",
+            status: error.response.status
+        })
+        ctx.response.status = error.response.status
     }
     const patronId = patron.patron_id
     const newPin = ctx.request.body.pin1
     const newPin2 = ctx.request.body.pin2
 
-    await postNewPin(newPin, newPin2, patronId)
-        .then(() => {
-            ctx.response.status = 200
-        }).catch((error) => {
+    try {
+        await postNewPin(newPin, newPin2, patronId)
+        ctx.response.status = 200
+    } catch (error) {
+        if (error.response == undefined) {
+            errorLogger.error({
+                timestamp: new Date().toLocaleString(),
+                message: "Koha timeout",
+                url: error.config.url,
+                method: "post"
+            })
+            return 500
+        } else {
             errorLogger.error({
                 timestamp: new Date().toLocaleString(),
                 message: error.response.data.error,
@@ -39,7 +64,8 @@ async function post(ctx) {
                 method: "post"
             })
             ctx.response.status = error.response.status
-        })
+        }        
+    }
 }
 
 module.exports = {

@@ -56,9 +56,11 @@ paths:
                 phone:
                   type: string
                 pin1:
-                  type: string
+                  type: integer
+                  minimum: 1000
                 pin2:
-                  type: string
+                  type: integer
+                  minimum: 1000
               x-openapi-coercion-strict: true
       responses:
         201:
@@ -70,6 +72,8 @@ paths:
                 properties:
                   patron_id:
                     type: integer
+                  cardnumber:
+                    type: string
         400:
           description: Bad parameter
         401:
@@ -124,9 +128,11 @@ paths:
                 - pin2
               properties:
                 pin1:
-                  type: string
+                  type: integer
+                  minimum: 1000
                 pin2:
-                  type: string
+                  type: integer
+                  minimum: 1000
               x-openapi-coercion-strict: true
       responses:
         200:

@@ -62,9 +62,15 @@ const savePatron = async (data) => {
             data.cardnumber = parseInt(data.cardnumber) + 1
             data.userid = data.cardnumber
             return await savePatron(data)
+        } else if (error.response == undefined) {
+            errorLogger.error({
+                timestamp: new Date().toLocaleString(),
+                message: "Koha timeout",
+                url: error.config.url,
+                method: "post"
+            })
+            return 500
         } else {
-            // TODO: error.response voi olla undefined, esim. kun Kohaan ei saa yhteyttä!
-            // {patron_id}.js:ssä käsitelty: sama tähän ja pin.js:ään? Vai jopa joku middleware?
             let errorMessage = error.response.data.error 
             if (errorMessage.includes("Your action breaks a unique constraint on the attribute. type=SSN")) {
                 errorMessage = "Your action breaks a unique constraint on the attribute. type=SSN"
@@ -94,6 +100,7 @@ async function get(ctx) {
     if (!token) {
         return ctx.status = 401
     }
+
     let person = null
     try {
         person = await searchIdp(token)
@@ -110,22 +117,32 @@ async function get(ctx) {
         city: person.data.home_city,
         ssn: person.data.ssn
     }
-    // TODO: pitäiskö laittaa try catchiin?
-    const patron = await getPatron(personData)
-    if (!patron) {
-        return ctx.status = 404
+
+    let patron = null
+    try {
+        patron = await getPatron(personData)
+        if (!patron) {
+            return ctx.status = 404 
+        } 
+    } catch (error) {
+        errorLogger.error({
+            timestamp: new Date().toLocaleString(),
+            message: "Error searching Koha for the right patron",
+        })
+        ctx.response.status = 500
     }
+
     ctx.body = {
         cardnumber: patron.cardnumber
     }
 }
-
 
 async function post(ctx) {
     const token = getToken(ctx)
     if (!token) {
         return ctx.status = 401
     }
+
     let person = null
     try {
         person = await searchIdp(token)
@@ -133,11 +150,8 @@ async function post(ctx) {
         return ctx.status = error.response.status
     }
     const categoryCode = category[person.data.roles[0]] + faculties[person.data.faculty_code]
-
     const cardnumber = getNextCardnumber()
-
     const dateOfBirth = getDateOfBirth(person.data.ssn)
-
     const data = {
         address: ctx.request.body.address,
         city: ctx.request.body.city,
@@ -154,7 +168,7 @@ async function post(ctx) {
         userid: cardnumber,
         extended_attributes: [
             //{ type: "SSN", value: person.data.ssn },
-            { type: "SSN", value: "040101-0101" },
+            { type: "SSN", value: "050101-0101" },
             { type: "STAT_CAT", value: categoryCode }
         ],
         altcontact_firstname: person.data.preferred_username
@@ -180,7 +194,8 @@ async function post(ctx) {
             await postNewPin(newPin, newPin2, patronId)
             ctx.status = 201
             ctx.response.body = {
-                patron_id : patronId
+                patron_id : patronId,
+                cardnumber: newPatron.data.cardnumber
             }
             return
         } catch (error) {

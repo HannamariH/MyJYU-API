@@ -16,59 +16,53 @@ const checkSsn = (candidateData, ssn) => {
     return
 }
 
+const getCandidate = async (ssn, url) => {
+    try {
+        const candidates = await axios.get(url, {
+            headers: {
+                'Authorization': `Basic ${process.env.BASIC}`,
+                'x-koha-embed': 'extended_attributes'
+            }
+        })
+        const cand = checkSsn(candidates.data, ssn)
+        if (cand) {
+            return cand
+        }
+    } catch (error) {
+    }
+    return
+}
+
 const getPatron = async (personData) => {
 
     const ssn = personData.ssn
+    let cand = null
 
     // search by username
-    let candidates = await axios.get(`${baseAddress}/patrons/?altcontact_firstname=${personData.username}`, {
-        headers: {
-            'Authorization': `Basic ${process.env.BASIC}`,
-            'x-koha-embed': 'extended_attributes'
-        }
-    })
-    let cand = checkSsn(candidates.data, ssn)
+    cand = await getCandidate(ssn, `${baseAddress}/patrons/?altcontact_firstname=${personData.username}`)
+
     if (cand) {
         return cand
+    } else {
+        // search by name
+        const firstname = personData.firstname.split(" ")[0]
+        cand = await getCandidate(ssn, `${baseAddress}/patrons/?surname=${personData.surname}&firstname=${firstname}`)
     }
 
-    // search by firstname and surname
-    const firstname = personData.firstname.split(" ")[0]
-    candidates = await axios.get(`${baseAddress}/patrons/?surname=${personData.surname}&firstname=${firstname}`, {
-        headers: {
-            'Authorization': `Basic ${process.env.BASIC}`,
-            'x-koha-embed': 'extended_attributes'
-        }
-    })
-    cand = checkSsn(candidates.data, ssn)
     if (cand) {
         return cand
+    } else {
+        // search by email
+        cand = await getCandidate(ssn, `${baseAddress}/patrons/?email=${personData.email}`)
     }
 
-    // search by email
-    candidates = await axios.get(`${baseAddress}/patrons/?email=${personData.email}`, {
-        headers: {
-            'Authorization': `Basic ${process.env.BASIC}`,
-            'x-koha-embed': 'extended_attributes'
-        }
-    })
-    cand = checkSsn(candidates.data, ssn)
     if (cand) {
-        return cand
+        return cand    
+    } else {
+        // search by address
+        cand = await getCandidate(ssn, `${baseAddress}/patrons/?address=${personData.streetAddress}`)
     }
-
-    // search by street adress
-    candidates = await axios.get(`${baseAddress}/patrons/?address=${personData.streetAddress}`, {
-        headers: {
-            'Authorization': `Basic ${process.env.BASIC}`,
-            'x-koha-embed': 'extended_attributes'
-        }
-    })
-    cand = checkSsn(candidates.data, ssn)
-    if (cand) {
-        return cand
-    }
-    return
+    return cand    
 }
 
 const searchIdp = async (token) => {
@@ -95,7 +89,7 @@ const getToken = ctx => {
     if (auth.startsWith('Bearer')) {
         return auth.substring(7)
     }
-    return null
+    return
 }
 
 const getDateOfBirth = (ssn) => {
