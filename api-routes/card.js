@@ -2,7 +2,7 @@
 
 const axios = require('axios')
 const fs = require('fs')
-const { getToken, searchIdp, getPatron, postNewPin, getDateOfBirth, baseAddress } = require("../utils")
+const { getToken, searchIdp, getPatron, postNewPin, getDateOfBirth, validatePins, baseAddress } = require("../utils")
 const { errorLogger } = require("../logger")
 const { removePatron } = require("./card/{patron_id}")
 
@@ -142,6 +142,11 @@ async function post(ctx) {
     const token = getToken(ctx)
     if (!token) {
         return ctx.status = 401
+    }
+
+    const pinsValid = validatePins(ctx.request.body.pin1, ctx.request.body.pin2)
+    if (!pinsValid) {
+        return ctx.status = 400
     }
 
     let person = null

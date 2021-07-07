@@ -1,6 +1,6 @@
 'use strict'
 
-const { getToken, searchIdp, getPatron, postNewPin } = require("../../utils")
+const { getToken, searchIdp, getPatron, postNewPin, validatePins } = require("../../utils")
 const { errorLogger } = require("../../logger")
 
 async function post(ctx) {
@@ -8,6 +8,12 @@ async function post(ctx) {
     if (!token) {
         return ctx.status = 401
     }
+
+    const pinsValid = validatePins(ctx.request.body.pin1, ctx.request.body.pin2)
+    if (!pinsValid) {
+        return ctx.status = 400
+    }
+
     let person = null
     try {
         person = await searchIdp(token)

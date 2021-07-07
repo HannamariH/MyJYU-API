@@ -73,6 +73,15 @@ const searchIdp = async (token) => {
     })
 }
 
+// pin code must be numerical, 4 digits minimum
+const validatePins = (pin1, pin2) => {
+    if (pin1 != pin2) {
+        return false
+    }
+    const regex = new RegExp("^[0-9]{4,}$")
+    return regex.test(pin1)
+}
+
 const postNewPin = async (newPin, newPin2, patronId) => {
     await axios({
         method: "post", url: `${baseAddress}/patrons/${patronId}/password`, headers: {
@@ -107,4 +116,4 @@ const getDateOfBirth = (ssn) => {
     return year + "-" + month + "-" + day
 }
 
-module.exports = { getToken, searchIdp, getDateOfBirth, getPatron, checkSsn, postNewPin, baseAddress }
+module.exports = { getToken, searchIdp, getDateOfBirth, getPatron, checkSsn, postNewPin, validatePins, baseAddress }
