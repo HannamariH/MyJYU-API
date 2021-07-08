@@ -1,7 +1,7 @@
 'use strict'
 
 const axios = require('axios')
-const { baseAddress, testBaseAddress } = require("../../utils")
+const { baseAddress } = require("../../utils")
 const { errorLogger } = require("../../logger")
 
 const removePatron = async (patron_id) => {

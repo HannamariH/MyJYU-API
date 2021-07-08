@@ -7,8 +7,6 @@ const bodyParser = require('koa-body')
 const openapi = require('koa-openapi')
 const fs = require('fs')
 const path = require('path')
-const { errorLogger } = require("./logger")
-
 
 const app = new Koa()
 const router = new Router()

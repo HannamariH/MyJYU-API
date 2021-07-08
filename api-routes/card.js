@@ -2,7 +2,7 @@
 
 const axios = require('axios')
 const fs = require('fs')
-const { getToken, searchIdp, getPatron, postNewPin, getDateOfBirth, baseAddress, testBaseAddress } = require("../utils")
+const { getToken, searchIdp, getPatron, postNewPin, getDateOfBirth, validatePins, baseAddress } = require("../utils")
 const { errorLogger } = require("../logger")
 const { removePatron } = require("./card/{patron_id}")
 
@@ -137,12 +137,17 @@ async function get(ctx) {
     }
 }
 
+
 async function post(ctx) {
     const token = getToken(ctx)
     if (!token) {
         return ctx.status = 401
     }
 
+    const pinsValid = validatePins(ctx.request.body.pin1, ctx.request.body.pin2)
+    if (!pinsValid) {
+        return ctx.status = 400
+    }
     let person = null
     try {
         person = await searchIdp(token)
@@ -164,11 +169,10 @@ async function post(ctx) {
         phone: ctx.request.body.phone,
         date_of_birth: dateOfBirth,
         category_id: person.data.roles[0].toUpperCase(), //IDP:stä (STUDENT/STAFF, Kohan API vaatii!)
-        library_id: "MATTILA", //kaikille Lähde? (Nyt Mattila?)
+        library_id: "MATTILA", //myöhemmin kaikille Lähde!
         userid: cardnumber,
         extended_attributes: [
-            //{ type: "SSN", value: person.data.ssn },
-            { type: "SSN", value: "050101-0101" },
+            { type: "SSN", value: person.data.ssn },
             { type: "STAT_CAT", value: categoryCode }
         ],
         altcontact_firstname: person.data.preferred_username
@@ -180,7 +184,6 @@ async function post(ctx) {
     } catch (error) {
         return ctx.status = error.response.status
     }
-
     if (!newPatron) {
         return ctx.status = 500
     } else if (newPatron == 409) {
