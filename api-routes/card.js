@@ -148,7 +148,6 @@ async function post(ctx) {
     if (!pinsValid) {
         return ctx.status = 400
     }
-
     let person = null
     try {
         person = await searchIdp(token)
@@ -170,11 +169,10 @@ async function post(ctx) {
         phone: ctx.request.body.phone,
         date_of_birth: dateOfBirth,
         category_id: person.data.roles[0].toUpperCase(), //IDP:stä (STUDENT/STAFF, Kohan API vaatii!)
-        library_id: "MATTILA", //kaikille Lähde? (Nyt Mattila?)
+        library_id: "MATTILA", //myöhemmin kaikille Lähde!
         userid: cardnumber,
         extended_attributes: [
-            //{ type: "SSN", value: person.data.ssn },
-            { type: "SSN", value: "050101-0101" },
+            { type: "SSN", value: person.data.ssn },
             { type: "STAT_CAT", value: categoryCode }
         ],
         altcontact_firstname: person.data.preferred_username
@@ -186,7 +184,6 @@ async function post(ctx) {
     } catch (error) {
         return ctx.status = error.response.status
     }
-
     if (!newPatron) {
         return ctx.status = 500
     } else if (newPatron == 409) {
