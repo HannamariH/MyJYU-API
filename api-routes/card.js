@@ -156,7 +156,12 @@ async function post(ctx) {
     }
     const categoryCode = category[person.data.roles[0]] + faculties[person.data.faculty_code]
     const cardnumber = getNextCardnumber()
-    const dateOfBirth = getDateOfBirth(person.data.ssn)
+    let dateOfBirth = null
+    try {
+        dateOfBirth = getDateOfBirth(person.data.ssn)
+    } catch (error) {
+        return ctx.status = 400
+    }
     const data = {
         address: ctx.request.body.address,
         city: ctx.request.body.city,
