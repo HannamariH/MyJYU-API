@@ -1,5 +1,6 @@
 IMAGES := $(shell docker images -f "dangling=true" -q)
 CONTAINERS := $(shell docker ps -a -q -f status=exited)
+VOLUME := cardnumber
 
 clean:
 	docker rm -f $(CONTAINERS)
@@ -15,7 +16,9 @@ pull:
 	docker build -t osc.repo.kopla.jyu.fi/hahelle/myjyuapi:latest
 
 start:
-	docker run -d --name myjyu-api -p 3006:3000 osc.repo.kopla.jyu.fi/hahelle/myjyuapi
+	docker run -d --name myjyu-api \
+			-v $(VOLUME):/usr/src/app/logs \
+			-p 3006:3000 osc.repo.kopla.jyu.fi/hahelle/myjyuapi
 
 restart:
 	docker stop myjyu-api
