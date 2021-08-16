@@ -174,7 +174,7 @@ async function post(ctx) {
         phone: ctx.request.body.phone,
         date_of_birth: dateOfBirth,
         category_id: person.data.roles[0].toUpperCase(), //IDP:stä (STUDENT/STAFF, Kohan API vaatii!)
-        library_id: "MATTILA", //myöhemmin kaikille Lähde!
+        library_id: "MAIN",
         userid: cardnumber,
         extended_attributes: [
             { type: "SSN", value: person.data.ssn },
