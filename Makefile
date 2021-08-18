@@ -1,6 +1,6 @@
 IMAGES := $(shell docker images -f "dangling=true" -q)
 CONTAINERS := $(shell docker ps -a -q -f status=exited)
-VOLUME := cardnumber
+VOLUME := myjyuapi-cardnumber
 
 clean:
 	docker rm -f $(CONTAINERS)
