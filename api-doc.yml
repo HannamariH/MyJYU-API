@@ -16,6 +16,9 @@ paths:
                 properties:
                   cardnumber:
                     type: string
+                  patron_id:
+                    type: integer
+                    description: for development and testing, not for MyJYU users to see!
         400:
           description: Default response
         401:
@@ -72,6 +75,7 @@ paths:
                 properties:
                   patron_id:
                     type: integer
+                    description: for development and testing, not for MyJYU users to see!
                   cardnumber:
                     type: string
         400:
@@ -151,6 +155,3 @@ paths:
           description: Default response
         503:
           description: Under maintenance
-
-        
-

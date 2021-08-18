@@ -133,7 +133,8 @@ async function get(ctx) {
     }
 
     ctx.body = {
-        cardnumber: patron.cardnumber
+        cardnumber: patron.cardnumber,
+        patron_id: patron.patron_id
     }
 }
 
