@@ -10,10 +10,10 @@ build:
 	docker build -t osc.repo.kopla.jyu.fi/hahelle/myjyuapi:latest .
 
 push:
-	docker build osc.repo.kopla.jyu.fi/hahelle/myjyuapi:latest
+	docker push osc.repo.kopla.jyu.fi/hahelle/myjyuapi:latest
 
 pull:
-	docker build osc.repo.kopla.jyu.fi/hahelle/myjyuapi:latest
+	docker pull osc.repo.kopla.jyu.fi/hahelle/myjyuapi:latest
 
 start:
 	docker run -d --name myjyu-api \
