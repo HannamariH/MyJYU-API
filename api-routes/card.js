@@ -164,14 +164,14 @@ async function post(ctx) {
         return ctx.status = 400
     }
     const data = {
-        address: ctx.request.body.address,
-        city: ctx.request.body.city,
-        postal_code: ctx.request.body.postal_code,
+        address: person.data.home_street_address,
+        postal_code: person.data.home_zip_code,
+        city: person.data.home_city,
         cardnumber: cardnumber,
         firstname: person.data.given_name,
         surname: person.data.family_name,
         other_name: person.data.name,
-        email: ctx.request.body.email,
+        email: person.data.email,
         phone: ctx.request.body.phone,
         date_of_birth: dateOfBirth,
         category_id: person.data.roles[0].toUpperCase(), //IDP:stä (STUDENT/STAFF, Kohan API vaatii!)

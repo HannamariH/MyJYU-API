@@ -40,22 +40,10 @@ paths:
             schema:
               type: object
               required:
-                - address
-                - postal_code
-                - city
-                - email
                 - phone
                 - pin1
                 - pin2
               properties:
-                address:
-                  type: string
-                postal_code:
-                  type: string
-                city:
-                  type: string
-                email:
-                  type: string
                 phone:
                   type: string
                 pin1:
