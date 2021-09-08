@@ -18,7 +18,7 @@ pull:
 start:
 	docker run -d --name myjyu-api \
 			-v $(VOLUME):/usr/src/app/logs \
-			-p 3006:3000 osc.repo.kopla.jyu.fi/hahelle/myjyuapi
+			-p 3007:3000 osc.repo.kopla.jyu.fi/hahelle/myjyuapi
 
 restart:
 	docker stop myjyu-api
