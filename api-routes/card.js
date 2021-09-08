@@ -4,7 +4,6 @@ const axios = require('axios')
 const fs = require('fs')
 const { getToken, searchIdp, getPatron, postNewPin, getDateOfBirth, validatePins, baseAddress } = require("../utils")
 const { errorLogger } = require("../logger")
-const { removePatron } = require("./card/{patron_id}")
 
 const faculties = {
     AVOIN: "T",
@@ -92,6 +91,37 @@ const savePatron = async (data) => {
 
 }
 
+const removePatron = async (patron_id) => {
+    try {
+        const removedPatron = await axios ({
+            method: "delete", url: `${baseAddress}/patrons/${patron_id}`, headers: {
+                'Authorization': `Basic ${process.env.BASIC}`
+            }
+        })
+        return removedPatron.status
+    } catch (error) {
+        if (error.response == undefined) {
+            errorLogger.error({
+                timestamp: new Date().toLocaleString(),
+                message: "Koha timeout",
+                url: error.config.url,
+                method: "delete"
+            })
+            return 500
+        } else {
+            errorLogger.error({
+                timestamp: new Date().toLocaleString(),
+                message: error.response.data.error,  
+                status: error.response.status,
+                url: error.config.url,
+                method: "delete"
+            })
+            return error.response.status
+        }      
+    }
+}
+
+
 //-----------------routes-------------------------
 
 
@@ -100,7 +130,6 @@ async function get(ctx) {
     if (!token) {
         return ctx.status = 401
     }
-
     let person = null
     try {
         person = await searchIdp(token)
@@ -117,7 +146,6 @@ async function get(ctx) {
         city: person.data.home_city,
         ssn: person.data.ssn
     }
-
     let patron = null
     try {
         patron = await getPatron(personData)

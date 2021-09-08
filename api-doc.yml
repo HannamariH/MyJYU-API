@@ -82,30 +82,30 @@ paths:
           description: Default response
         503:
           description: Under maintenance
-  /card/{patron_id}:
-    delete:
-      description: Delete patron from library system Koha, for testing purposes only!
-      parameters:
-        - in: path
-          name: patron_id
-          required: true
-          schema:
-            type: integer
-      responses:
-        204:
-          description: Patron deleted
-        400:
-          description: Patron deletion failed
-        401:
-          description: Authentication required
-        403:
-          description: Access forbidden
-        404:
-          description: Patron not found
-        500:
-          description: Default response
-        501:
-          description: Default response
+  #/card/{patron_id}:
+  #  delete:
+  #    description: Delete patron from library system Koha, for testing purposes only!
+  #    parameters:
+  #      - in: path
+  #        name: patron_id
+  #        required: true
+  #        schema:
+  #          type: integer
+  #    responses:
+  #      204:
+  #        description: Patron deleted
+  #      400:
+  #        description: Patron deletion failed
+  #      401:
+  #        description: Authentication required
+  #      403:
+  #        description: Access forbidden
+  #      404:
+  #        description: Patron not found
+  #    500:
+  #        description: Default response
+  #      501:
+  #        description: Default response
   /card/pin:
     post:
       description: Change card's pin code
