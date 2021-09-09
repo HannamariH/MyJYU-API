@@ -191,6 +191,13 @@ async function post(ctx) {
     } catch (error) {
         return ctx.status = 400
     }
+    let role = null
+    if (typeof person.data.roles === "string") {
+        role = person.data.roles.toUpperCase()
+    } else {
+        role = person.data.roles[0].toUpperCase()
+    }
+
     const data = {
         address: person.data.home_street_address,
         postal_code: person.data.home_zip_code,
@@ -202,7 +209,7 @@ async function post(ctx) {
         email: person.data.email,
         phone: ctx.request.body.phone,
         date_of_birth: dateOfBirth,
-        category_id: person.data.roles[0].toUpperCase(), //IDP:stä (STUDENT/STAFF, Kohan API vaatii!)
+        category_id: role, //Kohan API vaatii
         library_id: "MAIN",
         userid: cardnumber,
         extended_attributes: [
