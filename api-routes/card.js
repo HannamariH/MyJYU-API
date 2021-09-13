@@ -71,17 +71,18 @@ const savePatron = async (data) => {
             return 500
         } else {
             let errorMessage = error.response.data.error 
-            if (errorMessage.includes("Your action breaks a unique constraint on the attribute. type=SSN")) {
+            /*if (errorMessage.includes("Your action breaks a unique constraint on the attribute. type=SSN")) {
                 errorMessage = "Your action breaks a unique constraint on the attribute. type=SSN"
-            }
+            }*/
             errorLogger.error({
                 timestamp: new Date().toLocaleString(),
                 message: errorMessage,
+                //temporarily log SSNs to help solve problems with card creation
                 status: error.response.status,
                 url: error.config.url,
                 method: "post"
             })
-            if (errorMessage == "Your action breaks a unique constraint on the attribute. type=SSN") {
+            if (errorMessage.includes("Your action breaks a unique constraint on the attribute. type=SSN")) {
                 return 409
             }
             return
@@ -150,6 +151,12 @@ async function get(ctx) {
     try {
         patron = await getPatron(personData)
         if (!patron) {
+            //logging to help solve problems with getting cards
+            errorLogger.error({
+                timestamp: new Date().toLocaleString(),
+                message: "Patron not found in Koha",
+                patron: personData
+            })
             return ctx.status = 404 
         } 
     } catch (error) {
@@ -227,6 +234,14 @@ async function post(ctx) {
     } catch (error) {
         return ctx.status = error.response.status
     }
+    //logging to help solve problems with category codes
+    if (newPatron && newPatron != 409) {
+        errorLogger.error({
+            timestamp: new Date().toLocaleString(),
+            message: "Patron added to Koha",
+            patron: data
+        })
+    } 
     if (!newPatron) {
         return ctx.status = 500
     } else if (newPatron == 409) {
