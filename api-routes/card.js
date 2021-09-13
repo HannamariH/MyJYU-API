@@ -221,8 +221,6 @@ async function post(ctx) {
         altcontact_firstname: person.data.preferred_username
     }
 
-    console.log("lähetetään: " + JSON.stringify(data))
-
     let newPatron = null
     try {
         newPatron = await savePatron(data)
