@@ -207,6 +207,12 @@ async function post(ctx) {
         categoryCode = category[person.data.roles[0]] + faculties[person.data.faculty_code]
     }
 
+    errorLogger.error({
+        timestamp: new Date().toLocaleString(),
+        message: "Trying to add patron, data from IDM:",
+        patron: JSON.stringify(person)
+    })
+
     const data = {
         address: person.data.home_street_address,
         postal_code: person.data.home_zip_code,
