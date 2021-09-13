@@ -17,7 +17,12 @@ const faculties = {
     MOVI: "E",
     OSC: "E",
     SPORT: "L",
-    YOP: "E"
+    YOP: "E",
+    EDU: "",
+    HUM: "",
+    NORIGHTS: "",
+    ULC: "", 	
+    YTK: ""
 }
 
 const category = {
@@ -199,18 +204,19 @@ async function post(ctx) {
     }
     let role = null
     let categoryCode = null
+    const facultyCode = person.data.faculty_code.toUpperCase().replace("ROTI-TDK-", "").replace("-", "")
     if (typeof person.data.roles === "string") {
         role = person.data.roles.toUpperCase()
-        categoryCode = category[person.data.roles] + faculties[person.data.faculty_code]
+        categoryCode = category[person.data.roles] + faculties[facultyCode]
     } else {
         role = person.data.roles[0].toUpperCase()
-        categoryCode = category[person.data.roles[0]] + faculties[person.data.faculty_code]
+        categoryCode = category[person.data.roles[0]] + faculties[facultyCode]
     }
 
     errorLogger.error({
         timestamp: new Date().toLocaleString(),
         message: "Trying to add patron, data from IDM:",
-        patron: JSON.stringify(person)
+        patron: person.data
     })
 
     const data = {
