@@ -183,7 +183,6 @@ async function post(ctx) {
     } catch (error) {
         return ctx.status = error.response.status
     }
-    const categoryCode = category[person.data.roles[0]] + faculties[person.data.faculty_code]
     const cardnumber = getNextCardnumber()
     let dateOfBirth = null
     try {
@@ -192,10 +191,13 @@ async function post(ctx) {
         return ctx.status = 400
     }
     let role = null
+    let categoryCode = null
     if (typeof person.data.roles === "string") {
         role = person.data.roles.toUpperCase()
+        categoryCode = category[person.data.roles] + faculties[person.data.faculty_code]
     } else {
         role = person.data.roles[0].toUpperCase()
+        categoryCode = category[person.data.roles[0]] + faculties[person.data.faculty_code]
     }
 
     const data = {
@@ -218,6 +220,8 @@ async function post(ctx) {
         ],
         altcontact_firstname: person.data.preferred_username
     }
+
+    console.log("lähetetään: " + JSON.stringify(data))
 
     let newPatron = null
     try {
