@@ -10,13 +10,6 @@ const baseAddress = "https://app1.jyu.koha.csc.fi/api/v1"
 const checkSsn = (candidateData, ssn) => {
     for (const cand of candidateData) {
         const candSsn = (cand.extended_attributes[0].value)
-        errorLogger.error({
-            timestamp: new Date().toLocaleString('fi-FI'),
-            message: "Checking if ssn matches",
-            candidate: cand.other_name,
-            candidatesSsn: candSsn,
-            ssnToLookFor: ssn
-        })
         if (candSsn == ssn) {
             return cand
         }
@@ -33,6 +26,14 @@ const getCandidate = async (ssn, url) => {
             }
         })
         const cand = checkSsn(candidates.data, ssn)
+        errorLogger.error({
+            timestamp: new Date().toLocaleString('fi-FI'),
+            message: "Checking if ssn matches",
+            url: url,
+            candidate: cand.other_name,
+            candidatesSsn: cand.extended_attributes[0].value,
+            ssnToLookFor: ssn
+        })
         if (cand) {
             return cand
         }
