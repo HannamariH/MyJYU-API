@@ -11,7 +11,7 @@ const checkSsn = (candidateData, ssn) => {
     for (const cand of candidateData) {
         const candSsn = (cand.extended_attributes[0].value)
         errorLogger.error({
-            timestamp: new Date().toLocaleString(),
+            timestamp: new Date().toLocaleString('fi-FI'),
             message: "Checking if ssn matches",
             candidate: cand.other_name,
             candidatesSsn: candSsn,

@@ -36,7 +36,7 @@ const getNextCardnumber = () => {
         return parseInt(lastNumber) + 1
     } catch (error) {
         errorLogger.error({
-            timestamp: new Date().toLocaleString(),
+            timestamp: new Date().toLocaleString('fi-FI'),
             message: "Could not read cardnumber.log"
         })
     }
@@ -47,7 +47,7 @@ const logUsedCardnumber = (number) => {
         fs.writeFileSync("logs/cardnumber.log", number.toString())
     } catch (error) {
         errorLogger.error({
-            timestamp: new Date().toLocaleString(),
+            timestamp: new Date().toLocaleString('fi-FI'),
             message: "Could not write to cardnumber.log"
         })
     }
@@ -68,7 +68,7 @@ const savePatron = async (data) => {
             return await savePatron(data)
         } else if (error.response == undefined) {
             errorLogger.error({
-                timestamp: new Date().toLocaleString(),
+                timestamp: new Date().toLocaleString('fi-FI'),
                 message: "Koha timeout",
                 url: error.config.url,
                 method: "post"
@@ -80,7 +80,7 @@ const savePatron = async (data) => {
                 errorMessage = "Your action breaks a unique constraint on the attribute. type=SSN"
             }*/
             errorLogger.error({
-                timestamp: new Date().toLocaleString(),
+                timestamp: new Date().toLocaleString('fi-FI'),
                 message: errorMessage,
                 //temporarily log SSNs to help solve problems with card creation
                 status: error.response.status,
@@ -108,7 +108,7 @@ const removePatron = async (patron_id) => {
     } catch (error) {
         if (error.response == undefined) {
             errorLogger.error({
-                timestamp: new Date().toLocaleString(),
+                timestamp: new Date().toLocaleString('fi-FI'),
                 message: "Koha timeout",
                 url: error.config.url,
                 method: "delete"
@@ -116,7 +116,7 @@ const removePatron = async (patron_id) => {
             return 500
         } else {
             errorLogger.error({
-                timestamp: new Date().toLocaleString(),
+                timestamp: new Date().toLocaleString('fi-FI'),
                 message: error.response.data.error,  
                 status: error.response.status,
                 url: error.config.url,
@@ -158,7 +158,7 @@ async function get(ctx) {
         if (!patron) {
             //logging to help solve problems with getting cards
             errorLogger.error({
-                timestamp: new Date().toLocaleString(),
+                timestamp: new Date().toLocaleString('fi-FI'),
                 message: "Patron not found in Koha",
                 patron: personData
             })
@@ -166,14 +166,14 @@ async function get(ctx) {
         } 
     } catch (error) {
         errorLogger.error({
-            timestamp: new Date().toLocaleString(),
+            timestamp: new Date().toLocaleString('fi-FI'),
             message: "Error searching Koha for the right patron",
         })
         ctx.response.status = 500
     }
 
     errorLogger.error({
-        timestamp: new Date().toLocaleString(),
+        timestamp: new Date().toLocaleString('fi-FI'),
         message: "Card succesfully got",
         patron: personData
     })
@@ -220,7 +220,7 @@ async function post(ctx) {
     }
 
     errorLogger.error({
-        timestamp: new Date().toLocaleString(),
+        timestamp: new Date().toLocaleString('fi-FI'),
         message: "Trying to add patron, data from IDM:",
         patron: person.data
     })
@@ -255,7 +255,7 @@ async function post(ctx) {
     //logging to help solve problems with category codes
     if (newPatron && newPatron != 409) {
         errorLogger.error({
-            timestamp: new Date().toLocaleString(),
+            timestamp: new Date().toLocaleString('fi-FI'),
             message: "Patron added to Koha",
             patron: data
         })
@@ -283,7 +283,7 @@ async function post(ctx) {
                 removed = await removePatron(patronId)
             } catch (error) {
                 errorLogger.error({
-                    timestamp: new Date().toLocaleString(),
+                    timestamp: new Date().toLocaleString('fi-FI'),
                     message: "Could not remove patron whose pin code is missing",
                     status: removed,
                     method: "delete"
@@ -295,7 +295,7 @@ async function post(ctx) {
                 return
             }            
             errorLogger.error({
-                timestamp: new Date().toLocaleString(),
+                timestamp: new Date().toLocaleString('fi-FI'),
                 message: error.response.data.error,
                 status: error.response.status,
                 url: error.config.url,

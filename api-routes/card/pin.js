@@ -39,7 +39,7 @@ async function post(ctx) {
         } 
     } catch (error) {
         errorLogger.error({
-            timestamp: new Date().toLocaleString(),
+            timestamp: new Date().toLocaleString('fi-FI'),
             message: "Error searching Koha for the right patron",
             status: error.response.status
         })
@@ -55,7 +55,7 @@ async function post(ctx) {
     } catch (error) {
         if (error.response == undefined) {
             errorLogger.error({
-                timestamp: new Date().toLocaleString(),
+                timestamp: new Date().toLocaleString('fi-FI'),
                 message: "Koha timeout",
                 url: error.config.url,
                 method: "post"
@@ -63,7 +63,7 @@ async function post(ctx) {
             return 500
         } else {
             errorLogger.error({
-                timestamp: new Date().toLocaleString(),
+                timestamp: new Date().toLocaleString('fi-FI'),
                 message: error.response.data.error,
                 status: error.response.status,
                 url: error.config.url,
