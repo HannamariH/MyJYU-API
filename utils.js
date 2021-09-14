@@ -47,28 +47,28 @@ const getPatron = async (personData) => {
     let cand = null
 
     // search by username
-    cand = await getCandidate(ssn, `${baseAddress}/patrons/?altcontact_firstname=${personData.username}`)
+    cand = await getCandidate(ssn, encodeURI(`${baseAddress}/patrons/?altcontact_firstname=${personData.username}`))
 
     if (cand) {
         return cand
     } else {
         // search by name
         const firstname = personData.firstname.split(" ")[0]
-        cand = await getCandidate(ssn, `${baseAddress}/patrons/?surname=${personData.surname}&firstname=${firstname}`)
+        cand = await getCandidate(ssn, encodeURI(`${baseAddress}/patrons/?surname=${personData.surname}&firstname=${firstname}`))
     }
 
     if (cand) {
         return cand
     } else {
         // search by email
-        cand = await getCandidate(ssn, `${baseAddress}/patrons/?email=${personData.email}`)
+        cand = await getCandidate(ssn, encodeURI(`${baseAddress}/patrons/?email=${personData.email}`))
     }
 
     if (cand) {
         return cand    
     } else {
         // search by address
-        cand = await getCandidate(ssn, `${baseAddress}/patrons/?address=${personData.streetAddress}`)
+        cand = await getCandidate(ssn, encodeURI(`${baseAddress}/patrons/?address=${personData.streetAddress}`))
     }
     return cand    
 }
