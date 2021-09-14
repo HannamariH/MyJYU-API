@@ -172,6 +172,12 @@ async function get(ctx) {
         ctx.response.status = 500
     }
 
+    errorLogger.error({
+        timestamp: new Date().toLocaleString(),
+        message: "Card succesfully got",
+        patron: personData
+    })
+
     ctx.body = {
         cardnumber: patron.cardnumber,
         patron_id: patron.patron_id
