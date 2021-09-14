@@ -1,6 +1,7 @@
 'use strict'
 
 const axios = require('axios')
+const { errorLogger } = require("./logger")
 
 // Testi-Kohan osoite
 //const baseAddress = "https://koha3-kktest.lib.helsinki.fi/api/v1"
@@ -9,6 +10,13 @@ const baseAddress = "https://app1.jyu.koha.csc.fi/api/v1"
 const checkSsn = (candidateData, ssn) => {
     for (const cand of candidateData) {
         const candSsn = (cand.extended_attributes[0].value)
+        errorLogger.error({
+            timestamp: new Date().toLocaleString(),
+            message: "Checking if ssn matches",
+            candidate: cand.other_name,
+            candidatesSsn: candSsn,
+            ssnToLookFor: ssn
+        })
         if (candSsn == ssn) {
             return cand
         }
