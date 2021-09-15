@@ -81,8 +81,8 @@ const savePatron = async (data) => {
             }*/
             errorLogger.error({
                 timestamp: new Date().toLocaleString('fi-FI'),
-                message: errorMessage,
                 //temporarily log SSNs to help solve problems with card creation
+                message: errorMessage,
                 status: error.response.status,
                 url: error.config.url,
                 method: "post"
@@ -263,7 +263,13 @@ async function post(ctx) {
             message: "Patron added to Koha",
             patron: data
         })
-    } 
+    } else {
+        errorLogger.error({
+            timestamp: new Date().toLocaleString('fi-FI'),
+            message: "Patron not added to Koha",
+            patron: data
+        })
+    }
     if (!newPatron) {
         return ctx.status = 500
     } else if (newPatron == 409) {
