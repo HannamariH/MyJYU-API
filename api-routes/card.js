@@ -218,6 +218,10 @@ async function post(ctx) {
         role = person.data.roles[0].toUpperCase()
         categoryCode = category[person.data.roles[0]] + faculties[facultyCode]
     }
+    if (role === "VISITOR") {
+        role = "STUDENT"
+        categoryCode = "P"
+    }
 
     errorLogger.error({
         timestamp: new Date().toLocaleString('fi-FI'),
