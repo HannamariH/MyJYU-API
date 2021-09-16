@@ -229,6 +229,8 @@ async function post(ctx) {
         patron: person.data
     })
 
+    const fullName = person.data.family_name + ", " + person.data.given_name
+
     const data = {
         address: person.data.home_street_address,
         postal_code: person.data.home_zip_code,
@@ -236,7 +238,7 @@ async function post(ctx) {
         cardnumber: cardnumber,
         firstname: person.data.given_name,
         surname: person.data.family_name,
-        other_name: person.data.name,
+        other_name: fullName,
         email: person.data.email,
         phone: ctx.request.body.phone,
         date_of_birth: dateOfBirth,
