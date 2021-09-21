@@ -178,8 +178,42 @@ async function get(ctx) {
         patron: personData
     })
 
+    //jos käyttäjän kirjastokortin numerona Kohassa on JYU:n käyttäjätunnus (kirjastokorttilomakkeen täyttäneet),
+    //luodaan käyttäjälle uusi mobiilikorttinumero ja tallennetaan se Kohaan
+    const usernameRegex = /^[a-z]+$/
+    let cardnumber = patron.cardnumber
+
+    if (usernameRegex.test(cardnumber)) {
+        const newCardnumber = getNextCardnumber()
+        const data = {
+            cardnumber: newCardnumber,
+            userid: newCardnumber,
+            //Kohan REST API vaatii seuraavat
+            surname: patron.surname,
+            address: patron.address,
+            city: patron.city,
+            library_id: patron.library_id,
+            category_id: patron.category_id
+        }
+        try {
+            const modifiedPatron = await axios({
+                method: "put", url: `${baseAddress}/patrons/${patron.patron_id}`, headers: {
+                    'Authorization': `Basic ${process.env.BASIC}`
+                }, data
+            })
+            logUsedCardnumber(modifiedPatron.data.cardnumber)
+            cardnumber = modifiedPatron.data.cardnumber
+        } catch (error) {
+            errorLogger.error({
+                timestamp: new Date().toLocaleString('fi-FI'),
+                message: "Error with changing cardnumber from JYU username to mobile card number",
+                patron: data
+            })
+        }  
+    }
+
     ctx.body = {
-        cardnumber: patron.cardnumber,
+        cardnumber: cardnumber,
         patron_id: patron.patron_id
     }
 }
