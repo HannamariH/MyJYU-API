@@ -31,10 +31,6 @@ describe("request without Bearer token returns 401", () => {
     })
     test('in POST /card', async () => {
         const response = await api.post('/card').send({
-            "address": "Keskikatu 1",
-            "postal_code": "40100",
-            "city": "Jyväskylä",
-            "email": "opiskelija@example.com",
             "phone": "123456789",
             "pin1": "1000",
             "pin2": "1000"
@@ -85,10 +81,6 @@ describe("post new patron", () => {
     })
     test("with right body and token succeeds", async () => {
         const response = await api.post('/card').send({
-            "address": "Keskikatu 1",
-            "postal_code": "40100",
-            "city": "Jyväskylä",
-            "email": "opiskelija@example.com",
             "phone": "123456789",
             "pin1": "1000",
             "pin2": "1000"
@@ -103,10 +95,6 @@ describe("post new patron", () => {
     })
     test("when the same ssn is aleady in use returns 409", async () => {
         await api.post('/card').send({
-            "address": "Keskikatu 1",
-            "postal_code": "40100",
-            "city": "Jyväskylä",
-            "email": "opiskelija@example.com",
             "phone": "123456789",
             "pin1": "1000",
             "pin2": "1000"
