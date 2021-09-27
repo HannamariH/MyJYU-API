@@ -18,11 +18,11 @@ const faculties = {
     OSC: "E",
     SPORT: "L",
     YOP: "E",
-    EDU: "",
-    HUM: "",
+    EDU: "S",
+    HUM: "H",
     NORIGHTS: "",
     ULC: "", 	
-    YTK: ""
+    YTK: "H"
 }
 
 const category = {
@@ -203,6 +203,11 @@ async function get(ctx) {
             })
             logUsedCardnumber(modifiedPatron.data.cardnumber)
             cardnumber = modifiedPatron.data.cardnumber
+            errorLogger.error({
+                timestamp: new Date().toLocaleString('fi-FI'),
+                message: "Changed JYU username to mobile card number",
+                patron: data
+            })
         } catch (error) {
             errorLogger.error({
                 timestamp: new Date().toLocaleString('fi-FI'),
