@@ -7,10 +7,39 @@ const { errorLogger } = require("./logger")
 //const baseAddress = "https://koha3-kktest.lib.helsinki.fi/api/v1"
 const baseAddress = "https://app1.jyu.koha.csc.fi/api/v1"
 
+const putSsn = async (cand, trimmedCandSsn) => {
+    const data = [
+            { type: "SSN", value: trimmedCandSsn }
+        ]    
+    try {
+        await axios({
+            method: "put", url: `${baseAddress}/patrons/${cand.patron_id}/extended_attributes`, headers: {
+                'Authorization': `Basic ${process.env.BASIC}`
+            }, data
+        })
+        errorLogger.error({
+            timestamp: new Date().toLocaleString('fi-FI'),
+            message: "Put trimmed ssn to Koha",
+            patron: data
+        })
+    } catch (error) {
+        errorLogger.error({
+            timestamp: new Date().toLocaleString('fi-FI'),
+            message: "Error with putting trimmed ssn to Koha",
+            patron: data
+        })
+    }
+}
+
 const checkSsn = (candidateData, ssn) => {
     for (const cand of candidateData) {
         const candSsn = (cand.extended_attributes[0].value)
-        if (candSsn == ssn) {
+        //poistetaan Kohasta haetusta hetusta mahdolliset välilyönnit ja rivinvaihdot
+        const trimmedCandSsn = candSsn.replace(/\s+/g, "")
+        if (trimmedCandSsn !== candSsn) {
+            putSsn(cand, trimmedCandSsn)
+        }
+        if (trimmedCandSsn == ssn) {
             return cand
         }
     }
