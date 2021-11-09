@@ -21,7 +21,7 @@ const faculties = {
     EDU: "S",
     HUM: "H",
     NORIGHTS: "",
-    ULC: "", 	
+    ULC: "",
     YTK: "H"
 }
 
@@ -60,6 +60,29 @@ const savePatron = async (data) => {
                 'Authorization': `Basic ${process.env.BASIC}`
             }, data
         })
+        // save default messaging preferences
+        const patronId = newPatron.data.patron_id
+        const message_prefs = {
+            "Advance_Notice": {
+                "days_in_advance": {
+                    "value": 3
+                },
+                "digest": {
+                    "value": true
+                },
+                "transport_types": {
+                    "email": true
+                }
+            },
+            "Hold_Filled": {
+                "transport_types": {
+                    "email": true
+                }
+            }
+        }
+        await axios.put(`${baseAddress}/contrib/kohasuomi/patrons/${patronId}/messaging_preferences`, message_prefs, {headers: {
+            'Authorization': `Basic ${process.env.BASIC}`
+        }})
         return newPatron
     } catch (error) {
         if (error.response.status == 409) {
@@ -75,7 +98,7 @@ const savePatron = async (data) => {
             })
             return 500
         } else {
-            let errorMessage = error.response.data.error 
+            let errorMessage = error.response.data.error
             /*if (errorMessage.includes("Your action breaks a unique constraint on the attribute. type=SSN")) {
                 errorMessage = "Your action breaks a unique constraint on the attribute. type=SSN"
             }*/
@@ -92,14 +115,14 @@ const savePatron = async (data) => {
             }
             return
         }
-    
+
     }
 
 }
 
 const removePatron = async (patron_id) => {
     try {
-        const removedPatron = await axios ({
+        const removedPatron = await axios({
             method: "delete", url: `${baseAddress}/patrons/${patron_id}`, headers: {
                 'Authorization': `Basic ${process.env.BASIC}`
             }
@@ -117,13 +140,13 @@ const removePatron = async (patron_id) => {
         } else {
             errorLogger.error({
                 timestamp: new Date().toLocaleString('fi-FI'),
-                message: error.response.data.error,  
+                message: error.response.data.error,
                 status: error.response.status,
                 url: error.config.url,
                 method: "delete"
             })
             return error.response.status
-        }      
+        }
     }
 }
 
@@ -162,8 +185,8 @@ async function get(ctx) {
                 message: "Patron not found in Koha",
                 patron: personData
             })
-            return ctx.status = 404 
-        } 
+            return ctx.status = 404
+        }
     } catch (error) {
         errorLogger.error({
             timestamp: new Date().toLocaleString('fi-FI'),
@@ -214,7 +237,7 @@ async function get(ctx) {
                 message: "Error with changing cardnumber from JYU username to mobile card number",
                 patron: data
             })
-        }  
+        }
     }
 
     ctx.body = {
@@ -324,7 +347,7 @@ async function post(ctx) {
             await postNewPin(newPin, newPin2, patronId)
             ctx.status = 201
             ctx.response.body = {
-                patron_id : patronId,
+                patron_id: patronId,
                 cardnumber: newPatron.data.cardnumber
             }
             return
@@ -344,7 +367,7 @@ async function post(ctx) {
                     message: "Could not remove patron whose pin code is missing"
                 }
                 return
-            }            
+            }
             errorLogger.error({
                 timestamp: new Date().toLocaleString('fi-FI'),
                 message: error.response.data.error,

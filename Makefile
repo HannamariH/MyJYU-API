@@ -7,7 +7,7 @@ clean:
 	docker rmi -f $(IMAGES)
 
 build:
-	docker build -t osc.repo.kopla.jyu.fi/hahelle/myjyuapi:latest .
+	docker buildx build --platform linux/amd64 -t osc.repo.kopla.jyu.fi/hahelle/myjyuapi:latest .
 
 push:
 	docker push osc.repo.kopla.jyu.fi/hahelle/myjyuapi:latest
