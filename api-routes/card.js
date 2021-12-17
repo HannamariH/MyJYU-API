@@ -20,9 +20,17 @@ const faculties = {
     YOP: "E",
     EDU: "S",
     HUM: "H",
+    YTK: "H",
+    "jy-ORG-12": "T",
+    "jy-ORG-24": "H",
+    "jy-ORG-25": "I",
+    "jy-ORG-27": "J",
+    "jy-ORG-39": "S",
+    "jy-ORG-55": "M",
+    "jy-ORG-52": "L",
+    "jy-ORG-35": "E",
     NORIGHTS: "",
-    ULC: "",
-    YTK: "H"
+    ULC: ""    
 }
 
 const category = {

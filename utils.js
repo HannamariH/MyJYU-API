@@ -82,6 +82,14 @@ const getPatron = async (personData) => {
     if (cand) {
         return cand
     } else {
+        // search by date of birth
+        const dateOfBirth = getDateOfBirth(ssn)
+        cand = await getCandidate(ssn, encodeURI(`${baseAddress}/patrons/?date_of_birth=${dateOfBirth}`))
+    }
+
+    if (cand) {
+        return cand
+    } else {
         // search by name
         const firstname = personData.firstname.split(" ")[0]
         cand = await getCandidate(ssn, encodeURI(`${baseAddress}/patrons/?surname=${personData.surname}&firstname=${firstname}`))
