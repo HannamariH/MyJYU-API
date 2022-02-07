@@ -14,7 +14,8 @@ const putSsn = async (cand, trimmedCandSsn) => {
     try {
         await axios({
             method: "put", url: `${baseAddress}/patrons/${cand.patron_id}/extended_attributes`, headers: {
-                'Authorization': `Basic ${process.env.BASIC}`
+                'Authorization': `Basic ${process.env.BASIC}`,
+                'User-Agent': 'MyJYU api'
             }, data
         })
         errorLogger.error({
@@ -51,7 +52,8 @@ const getCandidate = async (ssn, url) => {
         const candidates = await axios.get(url, {
             headers: {
                 'Authorization': `Basic ${process.env.BASIC}`,
-                'x-koha-embed': 'extended_attributes'
+                'x-koha-embed': 'extended_attributes',
+                'User-Agent': 'MyJYU api'
             }
         })
         const cand = checkSsn(candidates.data, ssn)
@@ -131,7 +133,8 @@ const validatePins = (pin1, pin2) => {
 const postNewPin = async (newPin, newPin2, patronId) => {
     await axios({
         method: "post", url: `${baseAddress}/patrons/${patronId}/password`, headers: {
-            'Authorization': `Basic ${process.env.BASIC}`
+            'Authorization': `Basic ${process.env.BASIC}`,
+            'User-Agent': 'MyJYU api'
         }, data: {
             password: newPin,
             password_2: newPin2

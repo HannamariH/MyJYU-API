@@ -65,7 +65,8 @@ const savePatron = async (data) => {
     try {
         const newPatron = await axios({
             method: "post", url: `${baseAddress}/patrons`, headers: {
-                'Authorization': `Basic ${process.env.BASIC}`
+                'Authorization': `Basic ${process.env.BASIC}`,
+                'User-Agent': 'MyJYU api'
             }, data
         })
         // save default messaging preferences
@@ -89,7 +90,8 @@ const savePatron = async (data) => {
             }
         }
         await axios.put(`${baseAddress}/contrib/kohasuomi/patrons/${patronId}/messaging_preferences`, message_prefs, {headers: {
-            'Authorization': `Basic ${process.env.BASIC}`
+            'Authorization': `Basic ${process.env.BASIC}`,
+            'User-Agent': 'MyJYU api'
         }})
         return newPatron
     } catch (error) {
@@ -113,7 +115,7 @@ const savePatron = async (data) => {
             errorLogger.error({
                 timestamp: new Date().toLocaleString('fi-FI'),
                 //temporarily log SSNs to help solve problems with card creation
-                message: errorMessage,
+                message: "Other error in posting patron to Koha: " + errorMessage,
                 status: error.response.status,
                 url: error.config.url,
                 method: "post"
@@ -132,7 +134,8 @@ const removePatron = async (patron_id) => {
     try {
         const removedPatron = await axios({
             method: "delete", url: `${baseAddress}/patrons/${patron_id}`, headers: {
-                'Authorization': `Basic ${process.env.BASIC}`
+                'Authorization': `Basic ${process.env.BASIC}`,
+                'User-Agent': 'MyJYU api'
             }
         })
         return removedPatron.status
@@ -229,7 +232,8 @@ async function get(ctx) {
         try {
             const modifiedPatron = await axios({
                 method: "put", url: `${baseAddress}/patrons/${patron.patron_id}`, headers: {
-                    'Authorization': `Basic ${process.env.BASIC}`
+                    'Authorization': `Basic ${process.env.BASIC}`,
+                    'User-Agent': 'MyJYU api'
                 }, data
             })
             logUsedCardnumber(modifiedPatron.data.cardnumber)
