@@ -161,6 +161,11 @@ const removePatron = async (patron_id) => {
     }
 }
 
+const createOthername = () => {
+    const unixepoch = Math.round((new Date()).getTime() / 10).toString()
+    const epochdashed = unixepoch.replace(/(....)/g, '$1-').replace(/-$/,'')
+    return epochdashed
+}
 
 //-----------------routes-------------------------
 
@@ -303,8 +308,6 @@ async function post(ctx) {
         patron: person.data
     })
 
-    const fullName = person.data.family_name + ", " + person.data.given_name
-
     const data = {
         address: person.data.home_street_address,
         postal_code: person.data.home_zip_code,
@@ -312,7 +315,7 @@ async function post(ctx) {
         cardnumber: cardnumber,
         firstname: person.data.given_name,
         surname: person.data.family_name,
-        other_name: fullName,
+        other_name: createOthername(),
         email: person.data.email,
         phone: ctx.request.body.phone,
         date_of_birth: dateOfBirth,

@@ -61,7 +61,7 @@ const getCandidate = async (ssn, url) => {
             timestamp: new Date().toLocaleString('fi-FI'),
             message: "Checking if ssn matches",
             url: url,
-            candidate: cand.other_name,
+            candidate: `${cand.surname}, ${cand.firstname}`,
             candidatesSsn: cand.extended_attributes[0].value,
             ssnToLookFor: ssn
         })
