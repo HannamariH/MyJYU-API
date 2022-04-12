@@ -259,7 +259,8 @@ async function get(ctx) {
 
     ctx.body = {
         cardnumber: cardnumber,
-        patron_id: patron.patron_id
+        patron_id: patron.patron_id,
+        hold_code: patron.other_name
     }
 }
 
