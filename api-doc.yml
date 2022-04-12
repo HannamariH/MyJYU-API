@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
   title: MyJYU library card api
-  version: '1.0.0'
+  version: '1.1.0'
 paths:
   /card:
     get:
@@ -16,6 +16,9 @@ paths:
                 properties:
                   cardnumber:
                     type: string
+                  hold_code:
+                    type: string
+                    description: user's personal code for self-service hold pick-up
                   patron_id:
                     type: integer
                     description: for development and testing, not for MyJYU users to see!
