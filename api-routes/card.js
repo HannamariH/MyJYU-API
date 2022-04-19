@@ -6,21 +6,21 @@ const { getToken, searchIdp, getPatron, postNewPin, getDateOfBirth, validatePins
 const { errorLogger } = require("../logger")
 
 const faculties = {
-    AVOIN: "T",
-    HYTK: "H",
-    IT: "I",
-    JSBE: "J",
-    KPTK: "S",
-    KTL: "E",
-    KYC: "E",
-    MLTK: "M",
-    MOVI: "E",
-    OSC: "E",
-    SPORT: "L",
-    YOP: "E",
-    EDU: "S",
-    HUM: "H",
-    YTK: "H",
+    "AVOIN": "T",
+    "HYTK": "H",
+    "IT": "I",
+    "JSBE": "J",
+    "KPTK": "S",
+    "KTL": "E",
+    "KYC": "E",
+    "MLTK": "M",
+    "MOVI": "E",
+    "OSC": "E",
+    "SPORT": "L",
+    "YOP": "E",
+    "EDU": "S",
+    "HUM": "H",
+    "YTK": "H",
     "jy-ORG-12": "T",
     "jy-ORG-24": "H",
     "jy-ORG-25": "I",
@@ -29,8 +29,8 @@ const faculties = {
     "jy-ORG-55": "M",
     "jy-ORG-52": "L",
     "jy-ORG-35": "E",
-    NORIGHTS: "",
-    ULC: ""    
+    "NORIGHTS": "",
+    "ULC": ""    
 }
 
 const category = {
@@ -290,7 +290,7 @@ async function post(ctx) {
     }
     let role = null
     let categoryCode = null
-    const facultyCode = person.data.faculty_code.toUpperCase().replace("ROTI-TDK-", "").replace("-", "")
+    const facultyCode = person.data.faculty_code.toUpperCase().replace("ROTI-TDK-", "")
     if (typeof person.data.roles === "string") {
         role = person.data.roles.toUpperCase()
         categoryCode = category[person.data.roles] + faculties[facultyCode]
