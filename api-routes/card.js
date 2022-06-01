@@ -69,30 +69,6 @@ const savePatron = async (data) => {
                 'User-Agent': 'MyJYU api'
             }, data
         })
-        // save default messaging preferences
-        const patronId = newPatron.data.patron_id
-        const message_prefs = {
-            "Advance_Notice": {
-                "days_in_advance": {
-                    "value": 3
-                },
-                "digest": {
-                    "value": true
-                },
-                "transport_types": {
-                    "email": true
-                }
-            },
-            "Hold_Filled": {
-                "transport_types": {
-                    "email": true
-                }
-            }
-        }
-        await axios.put(`${baseAddress}/contrib/kohasuomi/patrons/${patronId}/messaging_preferences`, message_prefs, {headers: {
-            'Authorization': `Basic ${process.env.BASIC}`,
-            'User-Agent': 'MyJYU api'
-        }})
         return newPatron
     } catch (error) {
         if (error.response.status == 409) {
