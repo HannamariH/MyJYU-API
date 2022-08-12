@@ -1,3 +1,4 @@
 .env
+Makefile
 node_modules/
 logs/
