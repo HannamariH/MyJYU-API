@@ -1,10 +1,10 @@
 'use strict'
 
 const axios = require('axios')
-const { errorLogger } = require("./logger")
+const { logger } = require("./logger")
 
 // Testi-Kohan osoite
-//const baseAddress = "https://koha3-kktest.lib.helsinki.fi/api/v1"
+//const baseAddress = "https://koha-kktest.lib.helsinki.fi/api/v1"
 const baseAddress = "https://app1.jyu.koha.csc.fi/api/v1"
 
 const putSsn = async (cand, trimmedCandSsn) => {
@@ -18,14 +18,12 @@ const putSsn = async (cand, trimmedCandSsn) => {
                 'User-Agent': 'MyJYU api'
             }, data
         })
-        errorLogger.error({
-            timestamp: new Date().toLocaleString('fi-FI'),
+        logger.info({
             message: "Put trimmed ssn to Koha",
             patron: data
         })
     } catch (error) {
-        errorLogger.error({
-            timestamp: new Date().toLocaleString('fi-FI'),
+        logger.error({
             message: "Error with putting trimmed ssn to Koha",
             patron: data
         })
@@ -57,8 +55,7 @@ const getCandidate = async (ssn, url) => {
             }
         })
         const cand = checkSsn(candidates.data, ssn)
-        errorLogger.error({
-            timestamp: new Date().toLocaleString('fi-FI'),
+        logger.info({
             message: "Checking if ssn matches",
             url: url,
             candidate: `${cand.surname}, ${cand.firstname}`,

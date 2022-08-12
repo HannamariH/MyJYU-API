@@ -3,7 +3,7 @@
 const axios = require('axios')
 const fs = require('fs')
 const { getToken, searchIdp, getPatron, postNewPin, getDateOfBirth, validatePins, baseAddress } = require("../utils")
-const { errorLogger } = require("../logger")
+const { logger } = require("../logger")
 
 const faculties = {
     "AVOIN": "T",
@@ -43,8 +43,7 @@ const getNextCardnumber = () => {
         const lastNumber = fs.readFileSync("logs/cardnumber.log", "utf8")
         return parseInt(lastNumber) + 1
     } catch (error) {
-        errorLogger.error({
-            timestamp: new Date().toLocaleString('fi-FI'),
+        logger.error({
             message: "Could not read cardnumber.log"
         })
     }
@@ -54,8 +53,7 @@ const logUsedCardnumber = (number) => {
     try {
         fs.writeFileSync("logs/cardnumber.log", number.toString())
     } catch (error) {
-        errorLogger.error({
-            timestamp: new Date().toLocaleString('fi-FI'),
+        logger.error({
             message: "Could not write to cardnumber.log"
         })
     }
@@ -76,8 +74,7 @@ const savePatron = async (data) => {
             data.userid = data.cardnumber
             return await savePatron(data)
         } else if (error.response == undefined) {
-            errorLogger.error({
-                timestamp: new Date().toLocaleString('fi-FI'),
+            logger.error({
                 message: "Koha timeout",
                 url: error.config.url,
                 method: "post"
@@ -88,9 +85,7 @@ const savePatron = async (data) => {
             /*if (errorMessage.includes("Your action breaks a unique constraint on the attribute. type=SSN")) {
                 errorMessage = "Your action breaks a unique constraint on the attribute. type=SSN"
             }*/
-            errorLogger.error({
-                timestamp: new Date().toLocaleString('fi-FI'),
-                //temporarily log SSNs to help solve problems with card creation
+            logger.error({
                 message: "Other error in posting patron to Koha: " + errorMessage,
                 status: error.response.status,
                 url: error.config.url,
@@ -117,16 +112,14 @@ const removePatron = async (patron_id) => {
         return removedPatron.status
     } catch (error) {
         if (error.response == undefined) {
-            errorLogger.error({
-                timestamp: new Date().toLocaleString('fi-FI'),
+            logger.error({
                 message: "Koha timeout",
                 url: error.config.url,
                 method: "delete"
             })
             return 500
         } else {
-            errorLogger.error({
-                timestamp: new Date().toLocaleString('fi-FI'),
+            logger.error({
                 message: error.response.data.error,
                 status: error.response.status,
                 url: error.config.url,
@@ -171,24 +164,20 @@ async function get(ctx) {
     try {
         patron = await getPatron(personData)
         if (!patron) {
-            //logging to help solve problems with getting cards
-            errorLogger.error({
-                timestamp: new Date().toLocaleString('fi-FI'),
+            logger.info({
                 message: "Patron not found in Koha",
                 patron: personData
             })
             return ctx.status = 404
         }
     } catch (error) {
-        errorLogger.error({
-            timestamp: new Date().toLocaleString('fi-FI'),
+        logger.error({
             message: "Error searching Koha for the right patron",
         })
         ctx.response.status = 500
     }
 
-    errorLogger.error({
-        timestamp: new Date().toLocaleString('fi-FI'),
+    logger.info({
         message: "Card succesfully got",
         patron: personData
     })
@@ -219,14 +208,12 @@ async function get(ctx) {
             })
             logUsedCardnumber(modifiedPatron.data.cardnumber)
             cardnumber = modifiedPatron.data.cardnumber
-            errorLogger.error({
-                timestamp: new Date().toLocaleString('fi-FI'),
+            logger.info({
                 message: "Changed JYU username to mobile card number",
                 patron: data
             })
         } catch (error) {
-            errorLogger.error({
-                timestamp: new Date().toLocaleString('fi-FI'),
+            logger.error({
                 message: "Error with changing cardnumber from JYU username to mobile card number",
                 patron: data
             })
@@ -279,8 +266,7 @@ async function post(ctx) {
         categoryCode = "P"
     }
 
-    errorLogger.error({
-        timestamp: new Date().toLocaleString('fi-FI'),
+    logger.info({
         message: "Trying to add patron, data from IDM:",
         patron: person.data
     })
@@ -314,14 +300,12 @@ async function post(ctx) {
     }
     //logging to help solve problems with category codes
     if (newPatron && newPatron != 409) {
-        errorLogger.error({
-            timestamp: new Date().toLocaleString('fi-FI'),
+        logger.info({
             message: "Patron added to Koha",
             patron: data
         })
     } else {
-        errorLogger.error({
-            timestamp: new Date().toLocaleString('fi-FI'),
+        logger.error({
             message: "Patron not added to Koha",
             patron: data
         })
@@ -348,8 +332,7 @@ async function post(ctx) {
             try {
                 removed = await removePatron(patronId)
             } catch (error) {
-                errorLogger.error({
-                    timestamp: new Date().toLocaleString('fi-FI'),
+                logger.error({
                     message: "Could not remove patron whose pin code is missing",
                     status: removed,
                     method: "delete"
@@ -360,8 +343,7 @@ async function post(ctx) {
                 }
                 return
             }
-            errorLogger.error({
-                timestamp: new Date().toLocaleString('fi-FI'),
+            logger.error({
                 message: error.response.data.error,
                 status: error.response.status,
                 url: error.config.url,

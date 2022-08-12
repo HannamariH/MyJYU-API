@@ -1,7 +1,7 @@
 'use strict'
 
 const { getToken, searchIdp, getPatron, postNewPin, validatePins } = require("../../utils")
-const { errorLogger } = require("../../logger")
+const { logger } = require("../../logger")
 
 async function post(ctx) {
     const token = getToken(ctx)
@@ -38,8 +38,7 @@ async function post(ctx) {
             return ctx.status = 404 
         } 
     } catch (error) {
-        errorLogger.error({
-            timestamp: new Date().toLocaleString('fi-FI'),
+        logger.error({
             message: "Error searching Koha for the right patron",
             status: error.response.status
         })
@@ -54,16 +53,14 @@ async function post(ctx) {
         ctx.response.status = 200
     } catch (error) {
         if (error.response == undefined) {
-            errorLogger.error({
-                timestamp: new Date().toLocaleString('fi-FI'),
+            logger.error({
                 message: "Koha timeout",
                 url: error.config.url,
                 method: "post"
             })
             return 500
         } else {
-            errorLogger.error({
-                timestamp: new Date().toLocaleString('fi-FI'),
+            logger.error({
                 message: error.response.data.error,
                 status: error.response.status,
                 url: error.config.url,
