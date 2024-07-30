@@ -19,13 +19,11 @@ const putSsn = async (cand, trimmedCandSsn) => {
             }, data
         })
         logger.info({
-            message: "Put trimmed ssn to Koha",
-            patron: data
+            message: "Put trimmed ssn to Koha"
         })
     } catch (error) {
         logger.error({
-            message: "Error with putting trimmed ssn to Koha",
-            patron: data
+            message: "Error with putting trimmed ssn to Koha"
         })
     }
 }
@@ -55,13 +53,6 @@ const getCandidate = async (ssn, url) => {
             }
         })
         const cand = checkSsn(candidates.data, ssn)
-        logger.info({
-            message: "Checking if ssn matches",
-            url: url,
-            candidate: `${cand.surname}, ${cand.firstname}`,
-            candidatesSsn: cand.extended_attributes[0].value,
-            ssnToLookFor: ssn
-        })
         if (cand) {
             return cand
         }

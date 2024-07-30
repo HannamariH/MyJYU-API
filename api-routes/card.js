@@ -165,8 +165,7 @@ async function get(ctx) {
         patron = await getPatron(personData)
         if (!patron) {
             logger.info({
-                message: "Patron not found in Koha",
-                patron: personData
+                message: "Patron not found in Koha"
             })
             return ctx.status = 404
         }
@@ -178,8 +177,7 @@ async function get(ctx) {
     }
 
     logger.info({
-        message: "Card succesfully got",
-        patron: personData
+        message: "Card succesfully got"
     })
 
     //jos käyttäjän kirjastokortin numerona Kohassa on JYU:n käyttäjätunnus (kirjastokorttilomakkeen täyttäneet),
@@ -209,13 +207,11 @@ async function get(ctx) {
             logUsedCardnumber(modifiedPatron.data.cardnumber)
             cardnumber = modifiedPatron.data.cardnumber
             logger.info({
-                message: "Changed JYU username to mobile card number",
-                patron: data
+                message: "Changed JYU username to mobile card number"
             })
         } catch (error) {
             logger.error({
-                message: "Error with changing cardnumber from JYU username to mobile card number",
-                patron: data
+                message: "Error with changing cardnumber from JYU username to mobile card number"
             })
         }
     }
@@ -266,11 +262,6 @@ async function post(ctx) {
         categoryCode = "P"
     }
 
-    logger.info({
-        message: "Trying to add patron, data from IDM:",
-        patron: person.data
-    })
-
     const data = {
         address: person.data.home_street_address,
         postal_code: person.data.home_zip_code,
@@ -301,13 +292,11 @@ async function post(ctx) {
     //logging to help solve problems with category codes
     if (newPatron && newPatron != 409) {
         logger.info({
-            message: "Patron added to Koha",
-            patron: data
+            message: "Patron added to Koha"
         })
     } else {
         logger.error({
-            message: "Patron not added to Koha",
-            patron: data
+            message: "Patron not added to Koha"
         })
     }
     if (!newPatron) {
